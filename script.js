@@ -38,12 +38,18 @@
                 InteractiveMoments.init();
                 DynamicReadouts.init();
                 Countdown.init();
+                IntelTicker.init();
+                ActivityIndicators.init();
+                if (!this.state.isMobile && !this.state.reducedMotion) {
+                    OpsMap.init();
+                }
                 ContactForm.init();
                 if (!this.state.isMobile) {
                     BookTilt.init();
                     IntelToasts.init();
                 }
                 KonamiCode.init();
+                VisibilityHandler.init();
             });
         }
     };
@@ -766,6 +772,64 @@
                 osc.start();
                 osc.stop(this.ctx.currentTime + 0.5);
             } catch (e) {}
+        },
+
+        playBlip() {
+            if (!this.isEnabled || !this.ctx) return;
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600 + Math.random() * 200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            } catch (e) {}
+        },
+
+        playTickSound() {
+            if (!this.isEnabled || !this.ctx) return;
+            try {
+                const bufferSize = this.ctx.sampleRate * 0.015;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.08));
+                }
+                const source = this.ctx.createBufferSource();
+                source.buffer = buffer;
+                const gain = this.ctx.createGain();
+                gain.gain.value = 0.025;
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 2500;
+                filter.Q.value = 5;
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.masterGain);
+                source.start();
+            } catch (e) {}
+        },
+
+        playAlertTone() {
+            if (!this.isEnabled || !this.ctx) return;
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(250, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+            } catch (e) {}
         }
     };
 
@@ -1029,9 +1093,21 @@
         lng: 103.8198,
         signals: ['STRONG', 'NOMINAL', 'STRONG', 'ACTIVE', 'SCANNING...'],
         signalIndex: 0,
+        agents: 47,
+        intercepts: 2847,
+        threatLevels: ['LOW', 'MEDIUM', 'ELEVATED'],
+        threatColors: ['#22c55e', '#d4a031', '#ef4444'],
+        threatIndex: 0,
+        uplinkStates: ['STABLE', 'SYNCING', 'BUFFERING', 'STABLE', 'STABLE'],
+        uplinkIndex: 0,
+        sparkThreatData: [1, 1, 1, 2, 1, 1, 1, 1],
+        sparkInterceptsData: [3, 5, 2, 4, 3, 5, 2, 4],
 
         init() {
+            this.drawSparkline('sparkThreat', this.sparkThreatData, false);
+            this.drawSparkline('sparkIntercepts', this.sparkInterceptsData, true);
             setInterval(() => this.update(), 6000);
+            setTimeout(() => this.triggerAlert(), 20000 + Math.random() * 20000);
         },
 
         update() {
@@ -1043,6 +1119,10 @@
             const signalEl = document.querySelector('[data-dynamic="signal"]');
             const statusEl = document.querySelector('[data-dynamic="status"]');
             const protocolEl = document.querySelector('[data-dynamic="protocol"]');
+            const threatEl = document.querySelector('[data-dynamic="threat"]');
+            const agentsEl = document.querySelector('[data-dynamic="agents"]');
+            const interceptsEl = document.querySelector('[data-dynamic="intercepts"]');
+            const uplinkEl = document.querySelector('[data-dynamic="uplink"]');
 
             if (latEl) latEl.textContent = this.lat.toFixed(4);
             if (lngEl) lngEl.textContent = this.lng.toFixed(4);
@@ -1069,6 +1149,428 @@
                     protocolEl.style.color = '';
                 }, 1000);
             }
+
+            // Threat level
+            if (threatEl && Math.random() > 0.7) {
+                this.threatIndex = Math.floor(Math.random() * this.threatLevels.length);
+                threatEl.textContent = this.threatLevels[this.threatIndex];
+                threatEl.style.color = this.threatColors[this.threatIndex];
+                this.sparkThreatData.push(this.threatIndex + 1);
+                this.sparkThreatData.shift();
+                this.drawSparkline('sparkThreat', this.sparkThreatData, false);
+            }
+
+            // Agents count — tick smoothly
+            if (agentsEl) {
+                const newAgents = Math.max(42, Math.min(54, this.agents + Math.floor((Math.random() - 0.5) * 5)));
+                this.tickNumber(agentsEl, this.agents, newAgents, 800);
+                this.agents = newAgents;
+            }
+
+            // Intercepts — always goes up
+            if (interceptsEl) {
+                const newIntercepts = this.intercepts + Math.floor(1 + Math.random() * 5);
+                this.tickNumber(interceptsEl, this.intercepts, newIntercepts, 800);
+                this.intercepts = newIntercepts;
+                this.sparkInterceptsData.push(newIntercepts - this.intercepts + Math.floor(1 + Math.random() * 5));
+                this.sparkInterceptsData.shift();
+                this.drawSparkline('sparkIntercepts', this.sparkInterceptsData, true);
+            }
+
+            // Uplink status
+            if (uplinkEl && Math.random() > 0.6) {
+                this.uplinkIndex = (this.uplinkIndex + 1) % this.uplinkStates.length;
+                const state = this.uplinkStates[this.uplinkIndex];
+                uplinkEl.textContent = state;
+                uplinkEl.style.color = state === 'STABLE' ? '#22c55e' : '#38bdf8';
+            }
+        },
+
+        tickNumber(el, from, to, duration) {
+            const startTime = performance.now();
+            const animate = (now) => {
+                const progress = Math.min((now - startTime) / duration, 1);
+                const current = Math.round(from + (to - from) * progress);
+                el.textContent = current.toLocaleString();
+                if (progress < 1) requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        },
+
+        drawSparkline(canvasId, data, isAmber) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            const barW = w / data.length;
+            const max = Math.max(...data, 1);
+            const r = isAmber ? 212 : 34;
+            const g = isAmber ? 160 : 197;
+            const b = isAmber ? 49 : 94;
+            data.forEach((val, i) => {
+                const barH = (val / max) * h;
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.3 + (i / data.length) * 0.5})`;
+                ctx.fillRect(i * barW + 1, h - barH, barW - 2, barH);
+            });
+        },
+
+        triggerAlert() {
+            const readouts = document.querySelectorAll('.hero-data .data-line');
+            if (!readouts.length) return;
+            const target = readouts[Math.floor(Math.random() * readouts.length)];
+            target.classList.add('data-alert');
+            AudioSystem.playAlertTone();
+            setTimeout(() => target.classList.remove('data-alert'), 2000);
+            setTimeout(() => this.triggerAlert(), 30000 + Math.random() * 30000);
+        }
+    };
+
+    // ─── INTEL TICKER (Live Feed) ────────────────────
+    const IntelTicker = {
+        track: null,
+        container: null,
+        counter: 4471,
+        isPaused: false,
+        intervalId: null,
+
+        callsigns: ['ECHO-7', 'RAVEN-3', 'GHOST-12', 'VIPER-5', 'PHOENIX-9', 'SHADOW-2', 'FALCON-8', 'WOLF-11', 'COBRA-6', 'HAWK-4'],
+
+        templates: [
+            function() { return 'INTERCEPT #' + (IntelTicker.counter++) + ': Signal detected \u2014 Freq ' + (10 + Math.random() * 20).toFixed(1) + 'MHz \u2014 Origin: [CLASSIFIED]'; },
+            function() { return 'INTERCEPT #' + (IntelTicker.counter++) + ': Burst transmission \u2014 Duration ' + (0.1 + Math.random() * 3).toFixed(1) + 's \u2014 Decryption: PENDING'; },
+            function() { return 'INTERCEPT #' + (IntelTicker.counter++) + ': Pattern match \u2014 Codename TYPHON \u2014 Confidence: ' + (70 + Math.random() * 29).toFixed(0) + '%'; },
+            function() { return 'ASSET RELOCATION: ' + IntelTicker.callsigns[Math.floor(Math.random() * IntelTicker.callsigns.length)] + ' confirmed en route \u2014 ETA ' + String(Math.floor(Math.random() * 12)).padStart(2, '0') + ':' + String(Math.floor(Math.random() * 60)).padStart(2, '0') + ':00'; },
+            function() { return 'ASSET CHECK-IN: ' + IntelTicker.callsigns[Math.floor(Math.random() * IntelTicker.callsigns.length)] + ' \u2014 Status: NOMINAL \u2014 Location: [REDACTED]'; },
+            function() { return 'ASSET DEPLOYED: ' + IntelTicker.callsigns[Math.floor(Math.random() * IntelTicker.callsigns.length)] + ' operational \u2014 Cover intact \u2014 Next contact: ' + (2 + Math.floor(Math.random() * 22)) + ':00 UTC'; },
+            function() { return 'SYS_STATUS: Uplink ' + (Math.floor(Math.random() * 12) + 1) + ' \u2014 Latency: ' + Math.floor(5 + Math.random() * 45) + 'ms \u2014 NOMINAL'; },
+            function() { return 'SYS_STATUS: Network scan complete \u2014 ' + Math.floor(40 + Math.random() * 80) + ' nodes active \u2014 0 anomalies'; },
+            function() { return 'CRYPTO UPDATE: Cipher rotation complete \u2014 AES-256 \u2192 AES-' + [256, 512][Math.floor(Math.random() * 2)]; },
+            function() { return 'CRYPTO UPDATE: Key exchange with node ' + Math.floor(Math.random() * 50) + ' \u2014 Protocol: ECDH \u2014 Status: SECURE'; },
+            function() { return 'INTEL BRIEF: Field report #' + Math.floor(1000 + Math.random() * 9000) + ' received \u2014 Priority: ' + ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)]; },
+            function() { return 'SIGINT: New frequency cluster detected \u2014 Bearing: ' + Math.floor(Math.random() * 360) + '\u00b0 \u2014 Analysis: IN PROGRESS'; },
+            function() { return 'GEOINT: Satellite pass #' + Math.floor(100 + Math.random() * 900) + ' \u2014 Coverage: ' + ['SE Asia', 'Middle East', 'Eastern Europe', 'North Africa'][Math.floor(Math.random() * 4)]; },
+            function() { return 'SYS_STATUS: Database sync \u2014 ' + Math.floor(1000 + Math.random() * 9000) + ' records updated \u2014 Integrity: VERIFIED'; },
+            function() { return 'CRYPTO ALERT: Certificate renewal \u2014 SHA-' + [256, 384, 512][Math.floor(Math.random() * 3)] + ' \u2014 Expiry: ' + Math.floor(10 + Math.random() * 350) + 'd'; }
+        ],
+
+        init() {
+            this.container = document.getElementById('intelTicker');
+            this.track = document.getElementById('tickerTrack');
+            if (!this.container || !this.track) return;
+
+            this.container.addEventListener('mouseenter', () => { this.isPaused = true; });
+            this.container.addEventListener('mouseleave', () => { this.isPaused = false; });
+
+            // Seed initial entry
+            this.addEntry(false);
+
+            this.intervalId = setInterval(() => {
+                if (!this.isPaused) this.addEntry(true);
+            }, 3500 + Math.random() * 1500);
+        },
+
+        addEntry(animate) {
+            const template = this.templates[Math.floor(Math.random() * this.templates.length)];
+            const text = template();
+            const now = new Date();
+            const ts = String(now.getHours()).padStart(2, '0') + ':' +
+                       String(now.getMinutes()).padStart(2, '0') + ':' +
+                       String(now.getSeconds()).padStart(2, '0');
+
+            const entry = document.createElement('div');
+            entry.className = 'ticker-entry' + (animate ? ' ticker-entry--new' : '');
+            entry.innerHTML = '<span class="ticker-time">' + ts + '</span>' +
+                '<span class="ticker-sep"> // </span>' +
+                '<span class="ticker-text">' + text + '</span>';
+
+            // Crossfade: remove old, add new
+            const old = this.track.querySelector('.ticker-entry');
+            if (old && animate) {
+                old.classList.add('ticker-entry--out');
+                setTimeout(() => old.remove(), 400);
+            } else if (old) {
+                old.remove();
+            }
+
+            this.track.appendChild(entry);
+            if (animate) AudioSystem.playTickSound();
+        }
+    };
+
+    // ─── ACTIVITY INDICATORS ──────────────────────────
+    const ActivityIndicators = {
+        timestamps: [],
+        stampsShown: new Set(),
+
+        init() {
+            this.timestamps = document.querySelectorAll('[data-timestamp]');
+            this.updateTimestamps();
+            setInterval(() => this.updateTimestamps(), 10000);
+
+            if (!App.state.reducedMotion) {
+                this.scheduleSpinner();
+                if (!App.state.isMobile) {
+                    this.setupClassifiedStamps();
+                }
+            }
+        },
+
+        updateTimestamps() {
+            const now = Date.now();
+            this.timestamps.forEach(el => {
+                if (!el._startTime) el._startTime = now - Math.floor(Math.random() * 30000);
+                const elapsed = Math.floor((now - el._startTime) / 1000);
+                el.textContent = 'LAST SYNC: ' + elapsed + 's AGO';
+
+                if (elapsed > 45 + Math.random() * 30) {
+                    el._startTime = now;
+                    el.classList.add('timestamp-refresh');
+                    setTimeout(() => el.classList.remove('timestamp-refresh'), 500);
+                }
+            });
+        },
+
+        scheduleSpinner() {
+            const run = () => {
+                const headers = document.querySelectorAll('.section-header');
+                if (headers.length) {
+                    const header = headers[Math.floor(Math.random() * headers.length)];
+                    const spinner = document.createElement('span');
+                    spinner.className = 'processing-spinner';
+                    spinner.textContent = 'PROCESSING...';
+                    header.appendChild(spinner);
+
+                    setTimeout(() => {
+                        spinner.classList.add('processing-done');
+                        spinner.textContent = 'SYNCED';
+                        setTimeout(() => spinner.remove(), 800);
+                    }, 2000 + Math.random() * 2000);
+                }
+                setTimeout(run, 10000 + Math.random() * 10000);
+            };
+            setTimeout(run, 8000);
+        },
+
+        setupClassifiedStamps() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !this.stampsShown.has(entry.target)) {
+                        this.stampsShown.add(entry.target);
+                        this.flashClassifiedStamp(entry.target);
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+        },
+
+        flashClassifiedStamp(section) {
+            const stamp = document.createElement('div');
+            stamp.className = 'flash-classified-stamp';
+            stamp.textContent = 'CLASSIFIED';
+            section.style.position = 'relative';
+            section.appendChild(stamp);
+
+            requestAnimationFrame(() => stamp.classList.add('visible'));
+            setTimeout(() => {
+                stamp.classList.remove('visible');
+                setTimeout(() => stamp.remove(), 500);
+            }, 1500);
+        }
+    };
+
+    // ─── OPS MAP (SVG World Map) ─────────────────────
+    const OpsMap = {
+        svg: null,
+        citiesGroup: null,
+        connectionsGroup: null,
+        cities: [
+            { name: 'SINGAPORE', x: 759, y: 295 },
+            { name: 'TEL AVIV', x: 575, y: 220 },
+            { name: 'LONDON', x: 490, y: 150 },
+            { name: 'WASHINGTON', x: 250, y: 195 },
+            { name: 'TOKYO', x: 870, y: 205 },
+            { name: 'MOSCOW', x: 610, y: 145 },
+            { name: 'BERLIN', x: 520, y: 155 },
+            { name: 'SYDNEY', x: 880, y: 395 },
+            { name: 'CAIRO', x: 565, y: 240 },
+            { name: 'MUMBAI', x: 680, y: 265 },
+            { name: 'BEIJING', x: 800, y: 200 },
+            { name: 'PARIS', x: 500, y: 162 },
+            { name: 'DUBAI', x: 630, y: 248 },
+            { name: 'NEW YORK', x: 270, y: 195 },
+            { name: 'SAO PAULO', x: 320, y: 365 },
+            { name: 'LAGOS', x: 498, y: 295 },
+            { name: 'NAIROBI', x: 575, y: 310 },
+            { name: 'HONG KONG', x: 810, y: 248 },
+            { name: 'SEOUL', x: 840, y: 200 },
+            { name: 'BANGKOK', x: 765, y: 270 }
+        ],
+
+        init() {
+            this.svg = document.querySelector('.ops-map-svg');
+            if (!this.svg) return;
+            this.citiesGroup = document.getElementById('mapCities');
+            this.connectionsGroup = document.getElementById('mapConnections');
+            if (!this.citiesGroup || !this.connectionsGroup) return;
+
+            this.renderCityDots();
+            this.scheduleActivity();
+            this.scheduleHotspot();
+        },
+
+        renderCityDots() {
+            const ns = 'http://www.w3.org/2000/svg';
+            this.cities.forEach((city, i) => {
+                const circle = document.createElementNS(ns, 'circle');
+                circle.setAttribute('cx', city.x);
+                circle.setAttribute('cy', city.y);
+                circle.setAttribute('r', '2');
+                circle.setAttribute('class', 'map-dot');
+                circle.setAttribute('data-index', i);
+                this.citiesGroup.appendChild(circle);
+
+                const text = document.createElementNS(ns, 'text');
+                text.setAttribute('x', city.x);
+                text.setAttribute('y', city.y - 8);
+                text.setAttribute('class', 'map-label');
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = city.name;
+                text.setAttribute('data-index', i);
+                this.citiesGroup.appendChild(text);
+            });
+        },
+
+        activateCity(index) {
+            const ns = 'http://www.w3.org/2000/svg';
+            const city = this.cities[index];
+            const dot = this.citiesGroup.querySelector('.map-dot[data-index="' + index + '"]');
+            const label = this.citiesGroup.querySelector('.map-label[data-index="' + index + '"]');
+            if (!dot) return;
+
+            dot.classList.add('active');
+            if (label) label.classList.add('visible');
+            AudioSystem.playBlip();
+
+            // Pulse ring
+            const ring = document.createElementNS(ns, 'circle');
+            ring.setAttribute('cx', city.x);
+            ring.setAttribute('cy', city.y);
+            ring.setAttribute('r', '3');
+            ring.setAttribute('class', 'map-pulse-ring active');
+            this.citiesGroup.appendChild(ring);
+
+            setTimeout(() => {
+                dot.classList.remove('active');
+                if (label) label.classList.remove('visible');
+                ring.remove();
+            }, 3000);
+        },
+
+        drawConnection(fromIdx, toIdx) {
+            const ns = 'http://www.w3.org/2000/svg';
+            const from = this.cities[fromIdx];
+            const to = this.cities[toIdx];
+
+            const line = document.createElementNS(ns, 'line');
+            line.setAttribute('x1', from.x);
+            line.setAttribute('y1', from.y);
+            line.setAttribute('x2', to.x);
+            line.setAttribute('y2', to.y);
+            line.setAttribute('class', 'map-connection');
+
+            const dx = to.x - from.x;
+            const dy = to.y - from.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            line.style.strokeDasharray = length;
+            line.style.strokeDashoffset = length;
+
+            this.connectionsGroup.appendChild(line);
+
+            requestAnimationFrame(() => {
+                line.classList.add('drawing');
+                line.style.strokeDashoffset = '0';
+            });
+
+            setTimeout(() => {
+                line.classList.remove('drawing');
+                line.classList.add('fading');
+                setTimeout(() => line.remove(), 800);
+            }, 2500);
+        },
+
+        triggerHotspot(index) {
+            const dot = this.citiesGroup.querySelector('.map-dot[data-index="' + index + '"]');
+            const label = this.citiesGroup.querySelector('.map-label[data-index="' + index + '"]');
+            if (!dot) return;
+
+            dot.classList.add('hotspot');
+            if (label) { label.classList.add('visible'); label.classList.add('hotspot'); }
+            AudioSystem.playAlertTone();
+
+            setTimeout(() => {
+                dot.classList.remove('hotspot');
+                if (label) { label.classList.remove('visible'); label.classList.remove('hotspot'); }
+            }, 2500);
+        },
+
+        scheduleActivity() {
+            const run = () => {
+                const idx = Math.floor(Math.random() * this.cities.length);
+                this.activateCity(idx);
+
+                if (Math.random() > 0.6) {
+                    const fromIdx = Math.floor(Math.random() * this.cities.length);
+                    let toIdx;
+                    do { toIdx = Math.floor(Math.random() * this.cities.length); } while (toIdx === fromIdx);
+                    this.drawConnection(fromIdx, toIdx);
+                }
+
+                setTimeout(run, 4000 + Math.random() * 4000);
+            };
+            setTimeout(run, 3000);
+        },
+
+        scheduleHotspot() {
+            const run = () => {
+                const idx = Math.floor(Math.random() * this.cities.length);
+                this.triggerHotspot(idx);
+                setTimeout(run, 20000 + Math.random() * 20000);
+            };
+            setTimeout(run, 15000);
+        }
+    };
+
+    // ─── VISIBILITY HANDLER (pause when tab hidden) ──
+    const VisibilityHandler = {
+        timers: [],
+
+        init() {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    // Pause particles
+                    if (Particles.animId) {
+                        cancelAnimationFrame(Particles.animId);
+                        Particles.animId = null;
+                    }
+                    if (CursorGlow.rafId) {
+                        cancelAnimationFrame(CursorGlow.rafId);
+                        CursorGlow.rafId = null;
+                    }
+                } else {
+                    // Resume particles
+                    if (Particles.canvas && !Particles.animId && !App.state.isMobile && !App.state.reducedMotion) {
+                        Particles.animate();
+                    }
+                    if (CursorGlow.el && !CursorGlow.rafId && !App.state.isMobile && !App.state.reducedMotion) {
+                        CursorGlow.update();
+                    }
+                }
+            });
         }
     };
 

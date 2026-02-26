@@ -126,11 +126,42 @@
                 <div class="data-line">LAT: <span data-dynamic="lat">1.3521</span>&deg; N</div>
                 <div class="data-line">LNG: <span data-dynamic="lng">103.8198</span>&deg; E</div>
                 <div class="data-line">SIGNAL: <span class="text-green" data-dynamic="signal">STRONG</span></div>
+                <div class="data-line">THREAT: <span data-dynamic="threat" class="text-green">LOW</span> <canvas class="sparkline" id="sparkThreat" width="40" height="10"></canvas></div>
+                <div class="data-line">AGENTS: <span data-dynamic="agents">47</span> ACTIVE</div>
             </div>
             <div class="hero-data hero-data-right">
                 <div class="data-line">ENCRYPTION: AES-256</div>
                 <div class="data-line">PROTOCOL: <span data-dynamic="protocol">BREWSTER</span></div>
                 <div class="data-line">STATUS: <span class="text-amber blink" data-dynamic="status">ACTIVE</span></div>
+                <div class="data-line">INTERCEPTS: <span data-dynamic="intercepts">2,847</span> <canvas class="sparkline" id="sparkIntercepts" width="40" height="10"></canvas></div>
+                <div class="data-line">UPLINK: <span data-dynamic="uplink" class="text-green">STABLE</span></div>
+            </div>
+            <!-- Ops Map -->
+            <div class="ops-map-container" id="opsMap" aria-hidden="true">
+                <svg class="ops-map-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <filter id="mapGlow" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="2" result="blur"/>
+                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <g class="map-continents" opacity="0.4" fill="none" stroke="#2a2d42" stroke-width="0.8">
+                        <!-- North America -->
+                        <path d="M120,100 L170,80 L220,75 L260,90 L290,110 L300,140 L310,170 L295,200 L280,220 L260,240 L240,250 L220,260 L200,255 L180,240 L160,260 L140,280 L130,260 L125,230 L130,200 L120,170 L110,140 Z"/>
+                        <!-- South America -->
+                        <path d="M240,290 L270,280 L300,285 L330,300 L350,330 L360,360 L350,390 L330,420 L310,440 L290,445 L270,430 L260,400 L255,370 L250,340 L240,310 Z"/>
+                        <!-- Europe -->
+                        <path d="M460,90 L480,80 L510,85 L540,90 L560,100 L570,120 L560,140 L540,155 L520,165 L500,170 L480,165 L465,155 L455,140 L450,120 L455,105 Z"/>
+                        <!-- Africa -->
+                        <path d="M460,200 L490,190 L520,195 L550,210 L570,230 L580,260 L585,290 L580,320 L565,350 L540,375 L520,390 L500,395 L480,385 L465,360 L455,330 L450,300 L455,270 L460,240 Z"/>
+                        <!-- Asia -->
+                        <path d="M580,80 L620,70 L660,65 L700,70 L740,80 L780,90 L820,100 L850,115 L870,130 L880,160 L875,190 L860,210 L840,230 L820,240 L790,250 L760,255 L730,258 L700,255 L670,245 L640,230 L620,210 L600,190 L585,170 L575,150 L570,120 Z"/>
+                        <!-- Australia -->
+                        <path d="M820,340 L850,330 L880,335 L910,350 L920,375 L910,400 L890,415 L860,420 L835,410 L820,390 L815,365 Z"/>
+                    </g>
+                    <g class="map-connections" id="mapConnections"></g>
+                    <g class="map-cities" id="mapCities"></g>
+                </svg>
             </div>
         </section>
 
@@ -148,8 +179,10 @@
             <div class="container">
                 <div class="section-header reveal-element">
                     <span class="section-code">SEC_02</span>
+                    <span class="live-indicator"><span class="live-dot"></span> LIVE</span>
                     <h2 class="section-title scramble-text">MISSION FILES</h2>
                     <div class="section-line"></div>
+                    <span class="section-timestamp" data-timestamp></span>
                 </div>
 
                 <!-- Book 1 — Active Mission -->
@@ -253,8 +286,10 @@
             <div class="container">
                 <div class="section-header reveal-element">
                     <span class="section-code">SEC_03</span>
+                    <span class="live-indicator"><span class="live-dot"></span> LIVE</span>
                     <h2 class="section-title scramble-text">AGENT DOSSIER</h2>
                     <div class="section-line"></div>
+                    <span class="section-timestamp" data-timestamp></span>
                 </div>
 
                 <div class="dossier reveal-element">
@@ -308,8 +343,10 @@
             <div class="container">
                 <div class="section-header reveal-element">
                     <span class="section-code">SEC_04</span>
+                    <span class="live-indicator"><span class="live-dot"></span> LIVE</span>
                     <h2 class="section-title scramble-text">SECURE CHANNEL</h2>
                     <div class="section-line"></div>
+                    <span class="section-timestamp" data-timestamp></span>
                 </div>
 
                 <div class="comms-layout reveal-element">
@@ -393,6 +430,14 @@
 
     <!-- Toast notifications -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Intel Ticker (Live Feed) -->
+    <div class="intel-ticker" id="intelTicker" aria-hidden="true">
+        <div class="intel-ticker-label">
+            <span class="ticker-live-dot"></span> LIVE FEED
+        </div>
+        <div class="intel-ticker-track" id="tickerTrack"></div>
+    </div>
 
     <!-- Security Breach (Konami Easter Egg) -->
     <div class="security-breach" id="securityBreach">
