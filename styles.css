@@ -521,7 +521,7 @@ a { color: inherit; text-decoration: none; }
     background-image: url('images/hero-bg.jpg');
     background-size: cover;
     background-position: center;
-    opacity: 0.25;
+    opacity: 0.35;
     transform: scale(1.05);
 }
 
@@ -530,9 +530,9 @@ a { color: inherit; text-decoration: none; }
     inset: 0;
     background: linear-gradient(
         180deg,
-        rgba(7, 8, 12, 0.7) 0%,
-        rgba(7, 8, 12, 0.4) 40%,
-        rgba(7, 8, 12, 0.85) 100%
+        rgba(7, 8, 12, 0.6) 0%,
+        rgba(7, 8, 12, 0.3) 40%,
+        rgba(7, 8, 12, 0.8) 100%
     );
 }
 
@@ -1874,6 +1874,19 @@ a { color: inherit; text-decoration: none; }
     }
 
     .hero-data { display: none; }
+
+    .hero-bg-image {
+        opacity: 0.45;
+    }
+
+    .hero-overlay {
+        background: linear-gradient(
+            180deg,
+            rgba(7, 8, 12, 0.5) 0%,
+            rgba(7, 8, 12, 0.2) 40%,
+            rgba(7, 8, 12, 0.75) 100%
+        );
+    }
 }
 
 @media (max-width: 640px) {
