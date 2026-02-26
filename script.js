@@ -1429,7 +1429,7 @@
                 const circle = document.createElementNS(ns, 'circle');
                 circle.setAttribute('cx', city.x);
                 circle.setAttribute('cy', city.y);
-                circle.setAttribute('r', '2');
+                circle.setAttribute('r', '2.5');
                 circle.setAttribute('class', 'map-dot');
                 circle.setAttribute('data-index', i);
                 this.citiesGroup.appendChild(circle);
@@ -1460,7 +1460,7 @@
             const ring = document.createElementNS(ns, 'circle');
             ring.setAttribute('cx', city.x);
             ring.setAttribute('cy', city.y);
-            ring.setAttribute('r', '3');
+            ring.setAttribute('r', '4');
             ring.setAttribute('class', 'map-pulse-ring active');
             this.citiesGroup.appendChild(ring);
 
