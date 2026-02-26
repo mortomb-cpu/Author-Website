@@ -822,54 +822,118 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="btn-icon">&#9654;</span> TRANSMITTING...';
 
-            setTimeout(() => {
-                form.reset();
-                AudioSystem.playRevealSound();
+            // Collect form data
+            const data = new FormData(form);
 
-                // Show success response
-                const response = document.createElement('div');
-                response.className = 'form-response';
-                response.style.opacity = '0';
-                response.style.transition = 'opacity 0.4s ease';
-
-                const lines = [
-                    '> TRANSMISSION RECEIVED',
-                    '> ENCRYPTION: VERIFIED',
-                    '> STATUS: DELIVERED',
-                    '> OPERATOR WILL RESPOND VIA SECURE CHANNEL'
-                ];
-
-                form.style.display = 'none';
-                form.parentNode.appendChild(response);
-
-                // Type out response lines
-                let lineIndex = 0;
-                const typeLine = () => {
-                    if (lineIndex < lines.length) {
-                        response.innerHTML += (lineIndex > 0 ? '<br>' : '') + lines[lineIndex];
-                        lineIndex++;
-                        AudioSystem.playKeyClick();
-                        setTimeout(typeLine, 300);
-                    }
-                };
-
-                requestAnimationFrame(() => {
-                    response.style.opacity = '1';
-                    typeLine();
+            // POST to Formspree
+            fetch('https://formspree.io/f/xdalbgpj', {
+                method: 'POST',
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(res => {
+                if (res.ok) {
+                    return this.showSuccess(form, btn);
+                }
+                return res.json().then(json => {
+                    throw new Error(json.errors ? json.errors.map(e => e.message).join(', ') : 'Transmission failed');
                 });
+            })
+            .catch(err => {
+                this.showError(form, btn, err.message);
+            });
+        },
 
-                // Restore form after delay
+        showSuccess(form, btn) {
+            form.reset();
+            AudioSystem.playRevealSound();
+
+            const response = document.createElement('div');
+            response.className = 'form-response';
+            response.style.opacity = '0';
+            response.style.transition = 'opacity 0.4s ease';
+
+            const lines = [
+                '> TRANSMISSION RECEIVED',
+                '> ENCRYPTION: VERIFIED',
+                '> STATUS: DELIVERED',
+                '> OPERATOR WILL RESPOND VIA SECURE CHANNEL'
+            ];
+
+            form.style.display = 'none';
+            form.parentNode.appendChild(response);
+
+            // Type out response lines
+            let lineIndex = 0;
+            const typeLine = () => {
+                if (lineIndex < lines.length) {
+                    response.innerHTML += (lineIndex > 0 ? '<br>' : '') + lines[lineIndex];
+                    lineIndex++;
+                    AudioSystem.playKeyClick();
+                    setTimeout(typeLine, 300);
+                }
+            };
+
+            requestAnimationFrame(() => {
+                response.style.opacity = '1';
+                typeLine();
+            });
+
+            // Restore form after delay
+            setTimeout(() => {
+                response.style.opacity = '0';
                 setTimeout(() => {
-                    response.style.opacity = '0';
-                    setTimeout(() => {
-                        response.remove();
-                        form.style.display = '';
-                        btn.disabled = false;
-                        btn.innerHTML = '<span class="btn-icon">&#9654;</span> TRANSMIT';
-                    }, 400);
-                }, 5000);
+                    response.remove();
+                    form.style.display = '';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="btn-icon">&#9654;</span> TRANSMIT';
+                }, 400);
+            }, 5000);
+        },
 
-            }, 1500);
+        showError(form, btn, message) {
+            AudioSystem.playRevealSound();
+
+            const response = document.createElement('div');
+            response.className = 'form-response';
+            response.style.opacity = '0';
+            response.style.transition = 'opacity 0.4s ease';
+
+            const lines = [
+                '> TRANSMISSION FAILED',
+                '> ERROR: ' + (message || 'SECURE CHANNEL UNAVAILABLE').toUpperCase(),
+                '> RETRY RECOMMENDED'
+            ];
+
+            form.style.display = 'none';
+            form.parentNode.appendChild(response);
+
+            let lineIndex = 0;
+            const typeLine = () => {
+                if (lineIndex < lines.length) {
+                    response.innerHTML += (lineIndex > 0 ? '<br>' : '') +
+                        '<span style="color: #ef4444;">' + lines[lineIndex] + '</span>';
+                    lineIndex++;
+                    AudioSystem.playKeyClick();
+                    setTimeout(typeLine, 300);
+                }
+            };
+
+            requestAnimationFrame(() => {
+                response.style.opacity = '1';
+                typeLine();
+            });
+
+            // Restore form after delay so they can retry
+            setTimeout(() => {
+                response.style.opacity = '0';
+                setTimeout(() => {
+                    response.remove();
+                    form.style.display = '';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="btn-icon">&#9654;</span> TRANSMIT';
+                }, 400);
+            }, 4000);
         }
     };
 
