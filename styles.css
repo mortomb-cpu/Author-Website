@@ -1539,6 +1539,263 @@ a { color: inherit; text-decoration: none; }
     will-change: transform;
 }
 
+/* --- SCROLL PROGRESS BAR --- */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 9999;
+    background: rgba(30, 32, 48, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.scroll-progress.visible {
+    opacity: 1;
+}
+
+.scroll-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber-glow), 2px 0 12px var(--amber-glow);
+    transition: width 0.1s linear;
+}
+
+.scroll-progress-text {
+    position: absolute;
+    right: 12px;
+    top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* --- NAV COUNTDOWN --- */
+.nav-countdown {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-right: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.countdown-label {
+    color: var(--text-dim);
+}
+
+.countdown-timer {
+    color: var(--amber);
+    min-width: 140px;
+}
+
+.countdown-timer.deployed {
+    color: var(--green);
+}
+
+/* --- BOOT PROGRESS BAR --- */
+.boot-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    z-index: 1;
+}
+
+.boot-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    transition: width 0.3s ease;
+}
+
+/* --- 3D BOOK TILT --- */
+.book-mockup {
+    perspective: 800px;
+}
+
+.book-mockup-img {
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+}
+
+/* --- TOAST NOTIFICATIONS --- */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 8000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.toast {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--green);
+    background: rgba(7, 8, 12, 0.92);
+    border: 1px solid var(--green-dim);
+    border-left: 3px solid var(--green);
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-sm);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 320px;
+    pointer-events: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.hide {
+    transform: translateX(120%);
+    opacity: 0;
+}
+
+.toast-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.2rem;
+}
+
+.toast-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse-dot 1.5s ease infinite;
+}
+
+.toast-label {
+    color: var(--amber);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+}
+
+.toast-message {
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* --- SECURITY BREACH (Konami) --- */
+.security-breach {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.security-breach.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    animation: breachFlash 0.15s steps(2) 4;
+}
+
+@keyframes breachFlash {
+    0%, 100% { background: rgba(0, 0, 0, 0.95); }
+    50% { background: rgba(239, 68, 68, 0.15); }
+}
+
+.breach-scanline {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(239, 68, 68, 0.03) 2px,
+        rgba(239, 68, 68, 0.03) 4px
+    );
+    pointer-events: none;
+}
+
+.breach-content {
+    position: relative;
+    z-index: 1;
+}
+
+.breach-icon {
+    font-size: 4rem;
+    color: var(--red);
+    margin-bottom: var(--space-md);
+    animation: none;
+}
+
+.security-breach.active .breach-icon {
+    animation: breachPulse 0.5s ease infinite;
+}
+
+@keyframes breachPulse {
+    0%, 100% { opacity: 1; text-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+    50% { opacity: 0.5; text-shadow: 0 0 40px rgba(239, 68, 68, 0.8); }
+}
+
+.breach-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-sm);
+    text-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+}
+
+.breach-sub {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    margin-bottom: var(--space-xs);
+}
+
+.breach-detail {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    opacity: 0;
+}
+
+.security-breach.active .breach-detail {
+    animation: breachDetailIn 0.3s ease forwards 1s;
+}
+
+@keyframes breachDetailIn {
+    to { opacity: 1; }
+}
+
 /* --- REVEAL ANIMATIONS --- */
 .reveal-element {
     opacity: 0;
@@ -1664,6 +1921,15 @@ a { color: inherit; text-decoration: none; }
     }
 
     .nav-status { display: none; }
+    .nav-countdown { display: none; }
+
+    .toast-container {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+    }
+
+    .toast { max-width: none; }
 
     .section {
         padding: var(--space-2xl) 0;

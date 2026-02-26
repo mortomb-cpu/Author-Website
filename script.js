@@ -27,6 +27,7 @@
                 document.body.classList.remove('boot-active');
                 Navigation.init();
                 ScrollReveal.init();
+                ScrollProgress.init();
                 TypedText.init();
                 TextScramble.init();
                 if (!this.state.isMobile && !this.state.reducedMotion) {
@@ -36,7 +37,13 @@
                 AudioSystem.init();
                 InteractiveMoments.init();
                 DynamicReadouts.init();
+                Countdown.init();
                 ContactForm.init();
+                if (!this.state.isMobile) {
+                    BookTilt.init();
+                    IntelToasts.init();
+                }
+                KonamiCode.init();
             });
         }
     };
@@ -62,10 +69,12 @@
             const bootScreen = document.getElementById('bootScreen');
             const mainSite = document.getElementById('mainSite');
             const skipBtn = document.getElementById('bootSkip');
+            const progressBar = document.getElementById('bootProgressBar');
 
             const finish = () => {
                 if (this.cancelled) return;
                 this.cancelled = true;
+                if (progressBar) progressBar.style.width = '100%';
                 access.classList.add('show');
 
                 const t = setTimeout(() => {
@@ -87,13 +96,19 @@
 
             skipBtn.addEventListener('click', skip);
 
-            this.typeLine(terminal, 0, finish);
+            this.typeLine(terminal, 0, finish, progressBar);
         },
 
-        typeLine(terminal, lineIndex, onAllDone) {
+        typeLine(terminal, lineIndex, onAllDone, progressBar) {
             if (this.cancelled || lineIndex >= this.lines.length) {
                 if (!this.cancelled) onAllDone();
                 return;
+            }
+
+            // Update progress bar
+            if (progressBar) {
+                const pct = ((lineIndex + 1) / this.lines.length) * 90;
+                progressBar.style.width = pct + '%';
             }
 
             const line = this.lines[lineIndex];
@@ -123,14 +138,14 @@
                             AudioSystem.playRevealSound();
 
                             const t2 = setTimeout(() => {
-                                this.typeLine(terminal, lineIndex + 1, onAllDone);
+                                this.typeLine(terminal, lineIndex + 1, onAllDone, progressBar);
                             }, line.delay);
                             this.timeouts.push(t2);
                         }, 200);
                         this.timeouts.push(t1);
                     } else {
                         const t = setTimeout(() => {
-                            this.typeLine(terminal, lineIndex + 1, onAllDone);
+                            this.typeLine(terminal, lineIndex + 1, onAllDone, progressBar);
                         }, line.delay);
                         this.timeouts.push(t);
                     }
@@ -153,7 +168,7 @@
         el: null,
         phraseIndex: 0,
         charIndex: 0,
-        state: 'TYPING', // TYPING, PAUSING, DELETING, WAITING
+        state: 'TYPING',
         timeout: null,
 
         init() {
@@ -249,7 +264,6 @@
                 }
             };
 
-            // Start with all scrambled
             el.textContent = Array.from(original).map(c =>
                 c === ' ' ? ' ' : this.chars[Math.floor(Math.random() * this.chars.length)]
             ).join('');
@@ -287,6 +301,8 @@
             this.canvas.height = window.innerHeight * dpr;
             this.canvas.style.width = window.innerWidth + 'px';
             this.canvas.style.height = window.innerHeight + 'px';
+            // Reset transform before scaling to prevent stacking
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.scale(dpr, dpr);
         },
 
@@ -311,26 +327,22 @@
             const h = window.innerHeight;
             this.ctx.clearRect(0, 0, w, h);
 
-            // Update and draw particles
             for (let i = 0; i < this.particles.length; i++) {
                 const p = this.particles[i];
 
-                // Mouse repulsion
                 const dx = p.x - App.state.mouseX;
                 const dy = p.y - App.state.mouseY;
                 const distSq = dx * dx + dy * dy;
-                if (distSq < 22500 && distSq > 0) { // 150px radius
+                if (distSq < 22500 && distSq > 0) {
                     const dist = Math.sqrt(distSq);
                     const force = (150 - dist) / 150 * 0.5;
                     p.vx += (dx / dist) * force;
                     p.vy += (dy / dist) * force;
                 }
 
-                // Damping
                 p.vx *= 0.99;
                 p.vy *= 0.99;
 
-                // Enforce min speed
                 const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
                 if (speed < 0.1) {
                     p.vx += (Math.random() - 0.5) * 0.1;
@@ -340,25 +352,22 @@
                 p.x += p.vx;
                 p.y += p.vy;
 
-                // Wrap edges
                 if (p.x < 0) p.x = w;
                 if (p.x > w) p.x = 0;
                 if (p.y < 0) p.y = h;
                 if (p.y > h) p.y = 0;
 
-                // Draw particle
                 this.ctx.beginPath();
                 this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 this.ctx.fillStyle = `rgba(212, 160, 49, ${p.opacity})`;
                 this.ctx.fill();
 
-                // Draw connections
                 for (let j = i + 1; j < this.particles.length; j++) {
                     const p2 = this.particles[j];
                     const cx = p.x - p2.x;
                     const cy = p.y - p2.y;
                     const cdist = cx * cx + cy * cy;
-                    if (cdist < 14400) { // 120px
+                    if (cdist < 14400) {
                         const alpha = (1 - Math.sqrt(cdist) / 120) * 0.15;
                         this.ctx.beginPath();
                         this.ctx.moveTo(p.x, p.y);
@@ -408,7 +417,6 @@
         },
 
         update() {
-            // Smooth follow with lerp
             this.currentX += (this.targetX - this.currentX) * 0.1;
             this.currentY += (this.targetY - this.currentY) * 0.1;
             this.el.style.left = this.currentX + 'px';
@@ -420,18 +428,27 @@
     // ─── SCROLL REVEAL ───────────────────────────────
     const ScrollReveal = {
         init() {
+            // Group elements by parent section for per-section stagger
+            const sectionMap = new Map();
+
+            document.querySelectorAll('.reveal-element').forEach(el => {
+                const section = el.closest('section, .intel-section') || el.parentElement;
+                if (!sectionMap.has(section)) {
+                    sectionMap.set(section, []);
+                }
+                sectionMap.get(section).push(el);
+            });
+
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
                         observer.unobserve(entry.target);
 
-                        // Trigger text scramble for any child scramble-text
                         const scrambleEl = entry.target.querySelector('.scramble-text');
                         if (scrambleEl) {
                             TextScramble.trigger(scrambleEl);
                         }
-                        // Also check if the element itself is a scramble-text
                         if (entry.target.classList.contains('scramble-text')) {
                             TextScramble.trigger(entry.target);
                         }
@@ -444,11 +461,45 @@
                 rootMargin: '0px 0px -50px 0px'
             });
 
-            document.querySelectorAll('.reveal-element').forEach((el, i) => {
-                // Stagger delay for siblings
-                el.style.transitionDelay = (i * 0.08) + 's';
-                observer.observe(el);
+            // Apply stagger per section group
+            sectionMap.forEach((elements) => {
+                elements.forEach((el, i) => {
+                    el.style.transitionDelay = (i * 0.08) + 's';
+                    observer.observe(el);
+                });
             });
+        }
+    };
+
+    // ─── SCROLL PROGRESS BAR ─────────────────────────
+    const ScrollProgress = {
+        bar: null,
+        text: null,
+        container: null,
+
+        init() {
+            this.container = document.getElementById('scrollProgress');
+            this.bar = document.getElementById('scrollProgressBar');
+            this.text = document.getElementById('scrollProgressText');
+            if (!this.bar) return;
+
+            window.addEventListener('scroll', () => this.update(), { passive: true });
+            this.update();
+        },
+
+        update() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+
+            this.bar.style.width = pct + '%';
+            this.text.textContent = 'DECRYPTION: ' + Math.round(pct) + '%';
+
+            if (scrollTop > 100) {
+                this.container.classList.add('visible');
+            } else {
+                this.container.classList.remove('visible');
+            }
         }
     };
 
@@ -460,7 +511,6 @@
             const navLinks = document.getElementById('navLinks');
             const sections = document.querySelectorAll('section[id]');
 
-            // Scroll detection
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 50) {
                     nav.classList.add('scrolled');
@@ -469,14 +519,12 @@
                 }
             }, { passive: true });
 
-            // Mobile toggle
             navToggle.addEventListener('click', () => {
                 navToggle.classList.toggle('open');
                 navLinks.classList.toggle('open');
                 document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
             });
 
-            // Close mobile menu on link click
             navLinks.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', () => {
                     navToggle.classList.remove('open');
@@ -485,7 +533,6 @@
                 });
             });
 
-            // Active link highlighting
             const updateActive = () => {
                 const scrollPos = window.scrollY + 100;
                 sections.forEach(section => {
@@ -506,7 +553,6 @@
             window.addEventListener('scroll', updateActive, { passive: true });
             updateActive();
 
-            // Smooth scroll for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -518,6 +564,44 @@
                     }
                 });
             });
+        }
+    };
+
+    // ─── COUNTDOWN (April 11, 2026) ─────────────────
+    const Countdown = {
+        targetDate: new Date('2026-04-11T00:00:00').getTime(),
+        timerEl: null,
+        interval: null,
+
+        init() {
+            this.timerEl = document.getElementById('countdownTimer');
+            if (!this.timerEl) return;
+
+            this.update();
+            this.interval = setInterval(() => this.update(), 1000);
+        },
+
+        update() {
+            const now = Date.now();
+            const diff = this.targetDate - now;
+
+            if (diff <= 0) {
+                this.timerEl.textContent = 'DEPLOYED';
+                this.timerEl.classList.add('deployed');
+                if (this.interval) clearInterval(this.interval);
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            this.timerEl.textContent =
+                String(d).padStart(2, '0') + 'D ' +
+                String(h).padStart(2, '0') + 'H ' +
+                String(m).padStart(2, '0') + 'M ' +
+                String(s).padStart(2, '0') + 'S';
         }
     };
 
@@ -544,9 +628,7 @@
                 this.masterGain = this.ctx.createGain();
                 this.masterGain.gain.value = 0.5;
                 this.masterGain.connect(this.ctx.destination);
-            } catch (e) {
-                // Web Audio not supported
-            }
+            } catch (e) {}
         },
 
         toggle(btn) {
@@ -567,7 +649,6 @@
             if (!this.ctx) return;
             this.stopAmbientHum();
 
-            // Two detuned oscillators for a slow-beating hum
             const osc1 = this.ctx.createOscillator();
             const osc2 = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -614,10 +695,8 @@
 
                 const source = this.ctx.createBufferSource();
                 source.buffer = buffer;
-
                 const gain = this.ctx.createGain();
                 gain.gain.value = 0.06;
-
                 const filter = this.ctx.createBiquadFilter();
                 filter.type = 'highpass';
                 filter.frequency.value = 1800 + Math.random() * 800;
@@ -625,7 +704,6 @@
                 source.connect(filter);
                 filter.connect(gain);
                 gain.connect(this.masterGain);
-
                 source.start();
             } catch (e) {}
         },
@@ -645,7 +723,6 @@
 
                 osc.connect(gain);
                 gain.connect(this.masterGain);
-
                 osc.start();
                 osc.stop(this.ctx.currentTime + 0.15);
             } catch (e) {}
@@ -665,9 +742,29 @@
 
                 osc.connect(gain);
                 gain.connect(this.masterGain);
-
                 osc.start();
                 osc.stop(this.ctx.currentTime + 0.02);
+            } catch (e) {}
+        },
+
+        playAlarm() {
+            if (!this.isEnabled || !this.ctx) return;
+            try {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.2);
+                osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.4);
+
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.5);
             } catch (e) {}
         }
     };
@@ -722,7 +819,10 @@
                         const rect = bookImg.getBoundingClientRect();
                         const center = window.innerHeight / 2;
                         const offset = (rect.top + rect.height / 2 - center) * 0.03;
-                        bookImg.style.transform = `translateY(${-offset}px)`;
+                        // Only apply parallax when not being tilted
+                        if (!BookTilt.isTilting) {
+                            bookImg.style.transform = `translateY(${-offset}px)`;
+                        }
                         ticking = false;
                     });
                     ticking = true;
@@ -740,13 +840,186 @@
                     glitchEl.classList.remove('active');
                 }, 150);
 
-                // Schedule next glitch at random interval
                 const nextDelay = 25000 + Math.random() * 15000;
                 setTimeout(triggerGlitch, nextDelay);
             };
 
-            // First glitch after 20-40 seconds
             setTimeout(triggerGlitch, 20000 + Math.random() * 20000);
+        }
+    };
+
+    // ─── 3D BOOK TILT ────────────────────────────────
+    const BookTilt = {
+        isTilting: false,
+        mockup: null,
+        img: null,
+
+        init() {
+            this.mockup = document.querySelector('.book-mockup');
+            this.img = document.querySelector('.book-mockup-img');
+            if (!this.mockup || !this.img) return;
+
+            this.mockup.addEventListener('mousemove', (e) => {
+                this.isTilting = true;
+                const rect = this.mockup.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+
+                const tiltX = (y - 0.5) * -15;
+                const tiltY = (x - 0.5) * 15;
+
+                this.img.style.transform =
+                    `perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.05)`;
+                this.img.style.filter =
+                    `drop-shadow(${-tiltY * 2}px ${tiltX * 2}px 40px rgba(0, 0, 0, 0.5))`;
+            });
+
+            this.mockup.addEventListener('mouseleave', () => {
+                this.isTilting = false;
+                this.img.style.transform = '';
+                this.img.style.filter = 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5))';
+            });
+        }
+    };
+
+    // ─── INTEL TOAST NOTIFICATIONS ───────────────────
+    const IntelToasts = {
+        container: null,
+        messages: [
+            { label: 'INTERCEPT', text: 'ENCRYPTED SIGNAL — SECTOR 7G' },
+            { label: 'NETWORK', text: 'AGENT ONLINE — SINGAPORE NODE' },
+            { label: 'INTEL', text: 'NEW FIELD REPORT AVAILABLE' },
+            { label: 'UPLINK', text: 'SATELLITE HANDSHAKE CONFIRMED' },
+            { label: 'ALERT', text: 'PERIMETER SCAN COMPLETE — ALL CLEAR' },
+            { label: 'COMMS', text: 'SECURE CHANNEL VERIFIED — STANDBY' },
+            { label: 'RECON', text: 'SURVEILLANCE FEED ACTIVE — MARINA BAY' },
+            { label: 'CRYPTO', text: 'KEY ROTATION COMPLETE — AES-256' },
+            { label: 'OPS', text: 'MISSION BRIEFING UPDATED — CHECK FILES' },
+            { label: 'SIGNAL', text: 'BURST TRANSMISSION DECODED — ORIGIN: TEL AVIV' }
+        ],
+        usedIndices: [],
+        timeout: null,
+
+        init() {
+            this.container = document.getElementById('toastContainer');
+            if (!this.container) return;
+
+            // First toast after 15-30 seconds
+            this.schedule(15000 + Math.random() * 15000);
+        },
+
+        schedule(delay) {
+            this.timeout = setTimeout(() => {
+                this.show();
+                // Next toast every 35-70 seconds
+                this.schedule(35000 + Math.random() * 35000);
+            }, delay);
+        },
+
+        show() {
+            // Pick a random message we haven't used recently
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * this.messages.length);
+            } while (this.usedIndices.includes(idx) && this.usedIndices.length < this.messages.length);
+
+            this.usedIndices.push(idx);
+            if (this.usedIndices.length > this.messages.length / 2) {
+                this.usedIndices.shift();
+            }
+
+            const msg = this.messages[idx];
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML =
+                '<div class="toast-header">' +
+                    '<span class="toast-dot"></span>' +
+                    '<span class="toast-label">' + msg.label + '</span>' +
+                '</div>' +
+                '<div class="toast-message">' + msg.text + '</div>';
+
+            this.container.appendChild(toast);
+            AudioSystem.playHoverSound();
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            // Animate out after 4s
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+    };
+
+    // ─── KONAMI CODE EASTER EGG ──────────────────────
+    const KonamiCode = {
+        sequence: ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight'],
+        current: 0,
+        breachEl: null,
+        active: false,
+
+        init() {
+            this.breachEl = document.getElementById('securityBreach');
+            if (!this.breachEl) return;
+
+            document.addEventListener('keydown', (e) => {
+                if (this.active) return;
+
+                if (e.key === this.sequence[this.current]) {
+                    this.current++;
+                    if (this.current === this.sequence.length) {
+                        this.trigger();
+                        this.current = 0;
+                    }
+                } else {
+                    this.current = 0;
+                    // Check if current key starts the sequence
+                    if (e.key === this.sequence[0]) {
+                        this.current = 1;
+                    }
+                }
+            });
+        },
+
+        trigger() {
+            this.active = true;
+
+            // Play alarm sound
+            AudioSystem.playAlarm();
+            setTimeout(() => AudioSystem.playAlarm(), 300);
+            setTimeout(() => AudioSystem.playAlarm(), 600);
+
+            this.breachEl.classList.add('active');
+
+            // Resolve after 3 seconds
+            setTimeout(() => {
+                this.breachEl.classList.remove('active');
+                this.active = false;
+
+                // Show a "resolved" toast
+                if (IntelToasts.container) {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast';
+                    toast.innerHTML =
+                        '<div class="toast-header">' +
+                            '<span class="toast-dot"></span>' +
+                            '<span class="toast-label">RESOLVED</span>' +
+                        '</div>' +
+                        '<div class="toast-message">BREACH CONTAINED — COUNTERMEASURES ACTIVE</div>';
+                    IntelToasts.container.appendChild(toast);
+                    requestAnimationFrame(() => toast.classList.add('show'));
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                        toast.classList.add('hide');
+                        setTimeout(() => toast.remove(), 500);
+                    }, 5000);
+                }
+            }, 3000);
         }
     };
 
@@ -762,7 +1035,6 @@
         },
 
         update() {
-            // Drift coordinates
             this.lat += (Math.random() - 0.5) * 0.0002;
             this.lng += (Math.random() - 0.5) * 0.0002;
 
@@ -775,13 +1047,11 @@
             if (latEl) latEl.textContent = this.lat.toFixed(4);
             if (lngEl) lngEl.textContent = this.lng.toFixed(4);
 
-            // Cycle signal
             if (signalEl && Math.random() > 0.5) {
                 this.signalIndex = (this.signalIndex + 1) % this.signals.length;
                 signalEl.textContent = this.signals[this.signalIndex];
             }
 
-            // Occasional status flash
             if (statusEl && Math.random() > 0.85) {
                 statusEl.textContent = 'VERIFYING...';
                 statusEl.style.color = '#38bdf8';
@@ -791,7 +1061,6 @@
                 }, 800);
             }
 
-            // Rare protocol flash
             if (protocolEl && Math.random() > 0.95) {
                 protocolEl.textContent = 'TYPHON';
                 protocolEl.style.color = '#ef4444';
@@ -822,10 +1091,8 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="btn-icon">&#9654;</span> TRANSMITTING...';
 
-            // Collect form data
             const data = new FormData(form);
 
-            // POST to Formspree
             fetch('https://formspree.io/f/xdalbgpj', {
                 method: 'POST',
                 body: data,
@@ -863,7 +1130,6 @@
             form.style.display = 'none';
             form.parentNode.appendChild(response);
 
-            // Type out response lines
             let lineIndex = 0;
             const typeLine = () => {
                 if (lineIndex < lines.length) {
@@ -879,7 +1145,6 @@
                 typeLine();
             });
 
-            // Restore form after delay
             setTimeout(() => {
                 response.style.opacity = '0';
                 setTimeout(() => {
@@ -924,7 +1189,6 @@
                 typeLine();
             });
 
-            // Restore form after delay so they can retry
             setTimeout(() => {
                 response.style.opacity = '0';
                 setTimeout(() => {

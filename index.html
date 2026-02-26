@@ -34,10 +34,17 @@
                 <span class="access-sub">CLEARANCE: TOP SECRET // SCI</span>
             </div>
         </div>
+        <div class="boot-progress" id="bootProgress">
+            <div class="boot-progress-bar" id="bootProgressBar"></div>
+        </div>
         <button class="boot-skip" id="bootSkip">SKIP &gt;&gt;</button>
     </div>
 
     <!-- ===== OVERLAYS ===== -->
+    <div class="scroll-progress" id="scrollProgress">
+        <div class="scroll-progress-bar" id="scrollProgressBar"></div>
+        <span class="scroll-progress-text" id="scrollProgressText">DECRYPTION: 0%</span>
+    </div>
     <div class="scanlines"></div>
     <canvas id="particleCanvas"></canvas>
     <div class="cursor-glow" id="cursorGlow"></div>
@@ -68,6 +75,10 @@
                         <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
                     </svg>
                 </button>
+                <div class="nav-countdown" id="navCountdown">
+                    <span class="countdown-label">DEPLOYMENT:</span>
+                    <span class="countdown-timer" id="countdownTimer">--D --H --M --S</span>
+                </div>
                 <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
                     <span></span><span></span><span></span>
                 </button>
@@ -151,7 +162,7 @@
                     <div class="file-body">
                         <div class="file-visual">
                             <div class="book-mockup">
-                                <img src="images/book-3d-mockup.png" alt="The Brewster Protocol — 3D book mockup" class="book-mockup-img">
+                                <img src="images/book-3d-mockup.png" alt="The Brewster Protocol — 3D book mockup" class="book-mockup-img" loading="lazy">
                                 <div class="mockup-glow"></div>
                             </div>
                         </div>
@@ -182,10 +193,8 @@
                 </div>
 
                 <!-- Synopsis Banner -->
-                <div class="reveal-element">
-                    <div class="intel-banner intel-banner--overlay reveal-element" style="background-image: url('images/synopsis-banner.jpg')">
+                <div class="intel-banner intel-banner--overlay reveal-element" style="background-image: url('images/synopsis-banner.jpg')">
                     <span class="intel-banner-text">Josh Brewster walked away from Mossad five years ago.<br><strong>Then the CIA showed up with a body count and a deadline.</strong></span>
-                </div>
                 </div>
 
                 <!-- Book 2 — Classified -->
@@ -249,7 +258,7 @@
 
                 <div class="dossier reveal-element">
                     <div class="dossier-photo-wrapper">
-                        <img src="images/author-photo.jpg" alt="Moran Tomer — Author" class="dossier-photo">
+                        <img src="images/author-photo.jpg" alt="Moran Tomer — Author" class="dossier-photo" loading="lazy">
                         <div class="dossier-photo-scanline"></div>
                         <div class="dossier-photo-frame"></div>
                         <div class="dossier-photo-corners">
@@ -287,10 +296,8 @@
                     </div>
                 </div>
 
-                <div class="reveal-element">
-                    <div class="intel-banner intel-banner--overlay reveal-element" style="background-image: url('images/author-banner.jpg')">
+                <div class="intel-banner intel-banner--overlay reveal-element" style="background-image: url('images/author-banner.jpg')">
                     <span class="intel-banner-text">Written by a veteran of<br><strong>special forces &amp; cybersecurity.</strong></span>
-                </div>
                 </div>
             </div>
         </section>
@@ -309,10 +316,6 @@
                         <p class="comms-desc">Open encrypted communication channel. All transmissions are monitored and secured.</p>
                         <p class="comms-desc-small">Want to know when the next book drops? Have a theory, or just want to say hi? Initiate contact.</p>
                         <div class="comms-socials">
-                            <a href="#" class="social-btn" aria-label="Instagram">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
-                                <span>INSTAGRAM</span>
-                            </a>
                             <a href="https://amazon.com/author/morantomer" class="social-btn" aria-label="Amazon Author Page" target="_blank" rel="noopener noreferrer">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
                                 <span>AMAZON</span>
@@ -385,6 +388,20 @@
             </div>
         </footer>
 
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Security Breach (Konami Easter Egg) -->
+    <div class="security-breach" id="securityBreach">
+        <div class="breach-scanline"></div>
+        <div class="breach-content">
+            <div class="breach-icon">&#9888;</div>
+            <div class="breach-title">SECURITY BREACH DETECTED</div>
+            <div class="breach-sub">INTRUSION ORIGIN: UNKNOWN</div>
+            <div class="breach-detail">COUNTERMEASURES DEPLOYING...</div>
+        </div>
     </div>
 
     <script src="script.js"></script>
