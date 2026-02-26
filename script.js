@@ -144,11 +144,11 @@
     // ─── TYPED TEXT (Hero) ───────────────────────────
     const TypedText = {
         phrases: [
-            'Former operative. Current storyteller.',
+            'Former special forces. Current storyteller.',
             'The mission is the story.',
             'Some jobs come with a dental plan. His came with a kill list.',
             'Trust no one. Read everyone.',
-            'Trained by Mossad. Published by choice.'
+            'Forged in combat. Published by choice.'
         ],
         el: null,
         phraseIndex: 0,
