@@ -1998,6 +1998,15 @@ a { color: inherit; text-decoration: none; }
 .ops-map-svg {
     width: 100%;
     height: auto;
+    overflow: visible;
+}
+
+/* Real country paths from world-map.svg */
+.map-country {
+    fill: none;
+    stroke: rgba(212, 160, 49, 0.5);
+    stroke-width: 0.5;
+    transition: stroke 0.3s ease;
 }
 
 .map-dot {

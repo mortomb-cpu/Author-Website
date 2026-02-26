@@ -1383,44 +1383,101 @@
         }
     };
 
-    // ─── OPS MAP (SVG World Map) ─────────────────────
+    // ─── OPS MAP (Real SVG World Map) ─────────────────
     const OpsMap = {
         svg: null,
         citiesGroup: null,
         connectionsGroup: null,
+        // Coordinates matched to the real world-map.svg viewBox (30.767 241.591 784.077 458.627)
+        // Derived from known country positions: x ≈ 2.18*lng + 405, y ≈ -130*mercatorY + 525
         cities: [
-            { name: 'SINGAPORE', x: 759, y: 295 },
-            { name: 'TEL AVIV', x: 575, y: 220 },
-            { name: 'LONDON', x: 490, y: 150 },
-            { name: 'WASHINGTON', x: 250, y: 195 },
-            { name: 'TOKYO', x: 870, y: 205 },
-            { name: 'MOSCOW', x: 610, y: 145 },
-            { name: 'BERLIN', x: 520, y: 155 },
-            { name: 'SYDNEY', x: 880, y: 395 },
-            { name: 'CAIRO', x: 565, y: 240 },
-            { name: 'MUMBAI', x: 680, y: 265 },
-            { name: 'BEIJING', x: 800, y: 200 },
-            { name: 'PARIS', x: 500, y: 162 },
-            { name: 'DUBAI', x: 630, y: 248 },
-            { name: 'NEW YORK', x: 270, y: 195 },
-            { name: 'SAO PAULO', x: 320, y: 365 },
-            { name: 'LAGOS', x: 498, y: 295 },
-            { name: 'NAIROBI', x: 575, y: 310 },
-            { name: 'HONG KONG', x: 810, y: 248 },
-            { name: 'SEOUL', x: 840, y: 200 },
-            { name: 'BANGKOK', x: 765, y: 270 }
+            { name: 'SINGAPORE', lat: 1.35, lng: 103.82 },
+            { name: 'TEL AVIV', lat: 32.1, lng: 34.8 },
+            { name: 'LONDON', lat: 51.5, lng: -0.1 },
+            { name: 'WASHINGTON', lat: 38.9, lng: -77.0 },
+            { name: 'TOKYO', lat: 35.7, lng: 139.7 },
+            { name: 'MOSCOW', lat: 55.76, lng: 37.6 },
+            { name: 'BERLIN', lat: 52.5, lng: 13.4 },
+            { name: 'SYDNEY', lat: -33.9, lng: 151.2 },
+            { name: 'CAIRO', lat: 30.0, lng: 31.2 },
+            { name: 'MUMBAI', lat: 19.1, lng: 72.9 },
+            { name: 'BEIJING', lat: 39.9, lng: 116.4 },
+            { name: 'PARIS', lat: 48.9, lng: 2.35 },
+            { name: 'DUBAI', lat: 25.2, lng: 55.3 },
+            { name: 'NEW YORK', lat: 40.7, lng: -74.0 },
+            { name: 'SAO PAULO', lat: -23.55, lng: -46.63 },
+            { name: 'LAGOS', lat: 6.5, lng: 3.4 },
+            { name: 'NAIROBI', lat: -1.3, lng: 36.8 },
+            { name: 'HONG KONG', lat: 22.3, lng: 114.2 },
+            { name: 'SEOUL', lat: 37.6, lng: 127.0 },
+            { name: 'BANGKOK', lat: 13.8, lng: 100.5 }
         ],
 
-        init() {
-            this.svg = document.querySelector('.ops-map-svg');
-            if (!this.svg) return;
-            this.citiesGroup = document.getElementById('mapCities');
-            this.connectionsGroup = document.getElementById('mapConnections');
-            if (!this.citiesGroup || !this.connectionsGroup) return;
+        // Convert lat/lng to SVG coordinates using the map's projection
+        project(lat, lng) {
+            const rad = lat * Math.PI / 180;
+            const mercY = Math.log(Math.tan(Math.PI / 4 + rad / 2));
+            return {
+                x: 2.18 * lng + 405,
+                y: -130 * mercY + 525
+            };
+        },
 
-            this.renderCityDots();
-            this.scheduleActivity();
-            this.scheduleHotspot();
+        async init() {
+            const container = document.getElementById('opsMap');
+            if (!container) return;
+
+            try {
+                const resp = await fetch('world-map.svg');
+                if (!resp.ok) return;
+                const svgText = await resp.text();
+
+                // Parse the SVG and inject it
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgText, 'image/svg+xml');
+                const svgEl = doc.querySelector('svg');
+                if (!svgEl) return;
+
+                // Set up the SVG
+                svgEl.classList.add('ops-map-svg');
+                svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+                // Style all country paths for the spy theme
+                svgEl.querySelectorAll('path').forEach(p => {
+                    p.classList.add('map-country');
+                });
+
+                // Add glow filter
+                const ns = 'http://www.w3.org/2000/svg';
+                const defs = document.createElementNS(ns, 'defs');
+                defs.innerHTML = '<filter id="mapGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+                svgEl.insertBefore(defs, svgEl.firstChild);
+
+                // Add overlay groups for connections and cities
+                this.connectionsGroup = document.createElementNS(ns, 'g');
+                this.connectionsGroup.id = 'mapConnections';
+                svgEl.appendChild(this.connectionsGroup);
+
+                this.citiesGroup = document.createElementNS(ns, 'g');
+                this.citiesGroup.id = 'mapCities';
+                svgEl.appendChild(this.citiesGroup);
+
+                container.appendChild(svgEl);
+                this.svg = svgEl;
+
+                // Project city coordinates
+                this.cities.forEach(city => {
+                    const p = this.project(city.lat, city.lng);
+                    city.x = p.x;
+                    city.y = p.y;
+                });
+
+                this.renderCityDots();
+                this.scheduleActivity();
+                this.scheduleHotspot();
+            } catch (e) {
+                // Silently fail — map is decorative
+            }
         },
 
         renderCityDots() {
@@ -1436,7 +1493,7 @@
 
                 const text = document.createElementNS(ns, 'text');
                 text.setAttribute('x', city.x);
-                text.setAttribute('y', city.y - 8);
+                text.setAttribute('y', city.y - 6);
                 text.setAttribute('class', 'map-label');
                 text.setAttribute('text-anchor', 'middle');
                 text.textContent = city.name;
@@ -1456,11 +1513,10 @@
             if (label) label.classList.add('visible');
             AudioSystem.playBlip();
 
-            // Pulse ring
             const ring = document.createElementNS(ns, 'circle');
             ring.setAttribute('cx', city.x);
             ring.setAttribute('cy', city.y);
-            ring.setAttribute('r', '5');
+            ring.setAttribute('r', '4');
             ring.setAttribute('class', 'map-pulse-ring active');
             this.citiesGroup.appendChild(ring);
 
