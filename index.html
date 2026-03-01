@@ -17,9 +17,6 @@
     <meta name="twitter:title" content="Moran Tomer | Thriller Author">
     <meta name="twitter:description" content="The Brewster Protocols — a spy thriller series with dry humor, real tradecraft, and a partnership forged under fire.">
     <meta name="twitter:image" content="https://morantomer.com/images/hero-bg.jpg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -86,6 +83,7 @@
                     <li><a href="#home" data-text="BRIEFING">BRIEFING</a></li>
                     <li><a href="#files" data-text="FILES">FILES</a></li>
                     <li><a href="#agent" data-text="AGENT">AGENT</a></li>
+                    <li><a href="#recruit" data-text="RECRUIT">RECRUIT</a></li>
                     <li><a href="#comms" data-text="COMMS">COMMS</a></li>
                 </ul>
             </div>
@@ -313,11 +311,97 @@
             </div>
         </section>
 
-        <!-- CONTACT — Secure Channel -->
-        <section class="section" id="comms">
+        <!-- RECRUITMENT — Mailing List -->
+        <section class="section" id="recruit">
             <div class="container">
                 <div class="section-header reveal-element">
                     <span class="section-code">SEC_04</span>
+                    <span class="live-indicator"><span class="live-dot"></span> LIVE</span>
+                    <h2 class="section-title scramble-text">FIELD OPERATIVE RECRUITMENT</h2>
+                    <div class="section-line"></div>
+                    <span class="section-timestamp" data-timestamp></span>
+                </div>
+
+                <div class="recruit-layout reveal-element">
+                    <div class="recruit-brief">
+                        <div class="recruit-stamp">PRIORITY CLEARANCE // EYES ONLY</div>
+                        <h3 class="recruit-headline glitch-text" data-text="WE'RE RECRUITING">WE'RE RECRUITING</h3>
+                        <p class="recruit-pitch">We're assembling a network of operatives with one thing in common: they read faster than they run. If you want in on the operation before everyone else &mdash; this is your entry point.</p>
+                        <div class="recruit-perks">
+                            <div class="recruit-perk">
+                                <span class="perk-icon">&#10003;</span>
+                                <div class="perk-content">
+                                    <span class="perk-label">EARLY ACCESS</span>
+                                    <span class="perk-desc">New mission files before public deployment</span>
+                                </div>
+                            </div>
+                            <div class="recruit-perk">
+                                <span class="perk-icon">&#10003;</span>
+                                <div class="perk-content">
+                                    <span class="perk-label">CLASSIFIED BRIEFINGS</span>
+                                    <span class="perk-desc">Behind-the-scenes intel from the author</span>
+                                </div>
+                            </div>
+                            <div class="recruit-perk">
+                                <span class="perk-icon">&#10003;</span>
+                                <div class="perk-content">
+                                    <span class="perk-label">DEPLOYMENT ALERTS</span>
+                                    <span class="perk-desc">Priority notification on new releases</span>
+                                </div>
+                            </div>
+                            <div class="recruit-perk">
+                                <span class="perk-icon">&#10003;</span>
+                                <div class="perk-content">
+                                    <span class="perk-label">INTERCEPTED TRANSMISSIONS</span>
+                                    <span class="perk-desc">Bonus content you won't find anywhere else</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="recruit-form-wrapper">
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-dot terminal-dot--red"></span>
+                                <span class="terminal-dot terminal-dot--yellow"></span>
+                                <span class="terminal-dot terminal-dot--green"></span>
+                                <span class="terminal-title">agent_application.sh</span>
+                            </div>
+                            <form class="terminal-form" id="recruitForm">
+                                <div class="recruit-terminal-intro">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="recruit-intro-text">INITIATING RECRUITMENT PROTOCOL...</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <label for="recruit-name">CODENAME:</label>
+                                    <input type="text" id="recruit-name" name="name" required placeholder="Enter your name" autocomplete="given-name">
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <label for="recruit-email">SECURE_CHANNEL:</label>
+                                    <input type="email" id="recruit-email" name="email" required placeholder="Enter your email" autocomplete="email">
+                                </div>
+                                <label class="consent-checkbox">
+                                    <input type="checkbox" name="consent" required>
+                                    <span class="consent-check"></span>
+                                    <span class="consent-label">I agree to receive updates and have read the <a href="/privacy-policy.html" target="_blank">Privacy Policy</a>.</span>
+                                </label>
+                                <button type="submit" class="btn-classified btn-full">
+                                    <span class="btn-icon">&#9654;</span> SUBMIT APPLICATION
+                                </button>
+                            </form>
+                        </div>
+                        <p class="recruit-disclaimer">No spam &mdash; just mission-critical updates. Unsubscribe anytime. See our <a href="/privacy-policy.html">Privacy Policy</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT — Secure Channel -->
+        <section class="section section--alt" id="comms">
+            <div class="container">
+                <div class="section-header reveal-element">
+                    <span class="section-code">SEC_05</span>
                     <span class="live-indicator"><span class="live-dot"></span> LIVE</span>
                     <h2 class="section-title scramble-text">SECURE CHANNEL</h2>
                     <div class="section-line"></div>
@@ -364,6 +448,11 @@
                                     <label for="message">MESSAGE:</label>
                                     <textarea id="message" name="message" rows="4" required placeholder="Enter your message"></textarea>
                                 </div>
+                                <label class="consent-checkbox">
+                                    <input type="checkbox" name="consent" required>
+                                    <span class="consent-check"></span>
+                                    <span class="consent-label">I agree to the processing of my data as described in the <a href="/privacy-policy.html" target="_blank">Privacy Policy</a>.</span>
+                                </label>
                                 <button type="submit" class="btn-classified btn-full">
                                     <span class="btn-icon">&#9654;</span> TRANSMIT
                                 </button>
@@ -391,6 +480,7 @@
                             <span>THE BREWSTER PROTOCOLS</span>
                         </div>
                         <p class="footer-copy">&copy; 2026 Moran Tomer. All rights reserved.</p>
+                        <a href="/privacy-policy.html" class="footer-legal-link">Privacy Policy</a>
                     </div>
                     <div class="footer-right">
                         <a href="#home" class="footer-top-btn" aria-label="Back to top">

@@ -44,6 +44,7 @@
                     OpsMap.init();
                 }
                 ContactForm.init();
+                RecruitmentForm.init();
                 if (!this.state.isMobile) {
                     BookTilt.init();
                     IntelToasts.init();
@@ -1631,6 +1632,140 @@
     };
 
     // ─── CONTACT FORM ────────────────────────────────
+    // ─── RECRUITMENT FORM (MailerLite) ──────────────
+    const RecruitmentForm = {
+        init() {
+            const form = document.getElementById('recruitForm');
+            if (!form) return;
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                this.handleSubmit(form);
+            });
+        },
+
+        handleSubmit(form) {
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-icon">&#9654;</span> PROCESSING...';
+
+            const data = new FormData(form);
+
+            // MailerLite form submission
+            const mlData = new FormData();
+            mlData.append('fields[email]', data.get('email'));
+            mlData.append('fields[name]', data.get('name'));
+            mlData.append('ml-submit', '1');
+            mlData.append('anticsrf', 'true');
+
+            fetch('https://assets.mailerlite.com/jsonp/2026769/forms/180725101560333996/subscribe', {
+                method: 'POST',
+                body: mlData,
+            })
+            .then(() => {
+                this.showSuccess(form, btn);
+            })
+            .catch(() => {
+                this.showSuccess(form, btn);
+            });
+        },
+
+        showSuccess(form, btn) {
+            form.reset();
+            AudioSystem.playRevealSound();
+
+            const response = document.createElement('div');
+            response.className = 'form-response';
+            response.style.opacity = '0';
+            response.style.transition = 'opacity 0.4s ease';
+
+            const lines = [
+                '> APPLICATION RECEIVED',
+                '> RUNNING BACKGROUND CHECK... <span style="color: #22c55e;">CLEAR</span>',
+                '> CLEARANCE LEVEL: <span style="color: #d4a031;">APPROVED</span>',
+                '> WELCOME TO THE OPERATION, AGENT.'
+            ];
+
+            form.style.display = 'none';
+            form.parentNode.appendChild(response);
+
+            let lineIndex = 0;
+            const typeLine = () => {
+                if (lineIndex < lines.length) {
+                    response.innerHTML += (lineIndex > 0 ? '<br>' : '') + lines[lineIndex];
+                    lineIndex++;
+                    AudioSystem.playKeyClick();
+                    setTimeout(typeLine, 400);
+                }
+            };
+
+            requestAnimationFrame(() => {
+                response.style.opacity = '1';
+                typeLine();
+            });
+
+            setTimeout(() => {
+                response.style.opacity = '0';
+                setTimeout(() => {
+                    response.remove();
+                    form.style.display = '';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="btn-icon">&#9654;</span> SUBMIT APPLICATION';
+                }, 400);
+            }, 6000);
+        },
+
+        showError(form, btn, message) {
+            AudioSystem.playRevealSound();
+
+            const response = document.createElement('div');
+            response.className = 'form-response';
+            response.style.opacity = '0';
+            response.style.transition = 'opacity 0.4s ease';
+
+            const lines = [
+                '> APPLICATION FAILED',
+                '> ERROR: ' + (message || 'RECRUITMENT CHANNEL UNAVAILABLE').toUpperCase(),
+                '> RETRY RECOMMENDED'
+            ];
+
+            form.style.display = 'none';
+            form.parentNode.appendChild(response);
+
+            let lineIndex = 0;
+            const typeLine = () => {
+                if (lineIndex < lines.length) {
+                    response.innerHTML += (lineIndex > 0 ? '<br>' : '') +
+                        '<span style="color: #ef4444;">' + lines[lineIndex] + '</span>';
+                    lineIndex++;
+                    AudioSystem.playKeyClick();
+                    setTimeout(typeLine, 300);
+                }
+            };
+
+            requestAnimationFrame(() => {
+                response.style.opacity = '1';
+                typeLine();
+            });
+
+            setTimeout(() => {
+                response.style.opacity = '0';
+                setTimeout(() => {
+                    response.remove();
+                    form.style.display = '';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span class="btn-icon">&#9654;</span> SUBMIT APPLICATION';
+                }, 400);
+            }, 4000);
+        }
+    };
+
     const ContactForm = {
         init() {
             const form = document.getElementById('contactForm');
@@ -1638,6 +1773,10 @@
 
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
                 this.handleSubmit(form);
             });
         },

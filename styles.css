@@ -3,6 +3,90 @@
    Spy / Intelligence System Aesthetic
    ============================================ */
 
+/* --- Self-hosted Fonts --- */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url(fonts/inter-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url(fonts/inter-latin-ext.woff2) format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Playfair Display';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url(fonts/playfair-display-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Playfair Display';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url(fonts/playfair-display-latin-ext.woff2) format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Playfair Display';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url(fonts/playfair-display-italic-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Playfair Display';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url(fonts/playfair-display-italic-latin-ext.woff2) format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(fonts/space-mono-regular-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Space Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(fonts/space-mono-regular-latin-ext.woff2) format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+    font-family: 'Space Mono';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(fonts/space-mono-bold-latin.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+    font-family: 'Space Mono';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(fonts/space-mono-bold-latin-ext.woff2) format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 /* --- Reset & Base --- */
 *, *::before, *::after {
     margin: 0;
@@ -475,6 +559,70 @@ a { color: inherit; text-decoration: none; }
 
 .btn-icon {
     font-size: 0.6rem;
+}
+
+/* --- Consent Checkbox --- */
+.consent-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    padding: 0.6rem 0;
+}
+.consent-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.consent-check {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.02);
+    position: relative;
+    margin-top: 2px;
+    transition: all var(--transition);
+}
+.consent-check::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 4px;
+    height: 8px;
+    border: solid var(--green);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.15s ease;
+}
+.consent-checkbox input[type="checkbox"]:checked + .consent-check {
+    border-color: var(--green);
+    background: var(--green-dim);
+}
+.consent-checkbox input[type="checkbox"]:checked + .consent-check::after {
+    transform: rotate(45deg) scale(1);
+}
+.consent-checkbox input[type="checkbox"]:focus-visible + .consent-check {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+}
+.consent-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+}
+.consent-label a {
+    color: var(--amber);
+    text-decoration: none;
+}
+.consent-label a:hover {
+    text-decoration: underline;
 }
 
 .btn-outline {
@@ -1261,6 +1409,135 @@ a { color: inherit; text-decoration: none; }
 
 .dossier-bio p:last-child { margin-bottom: 0; }
 
+/* --- RECRUITMENT (Mailing List) --- */
+.recruit-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+    align-items: start;
+}
+
+.recruit-stamp {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 0.35rem 0.8rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
+}
+
+.recruit-headline {
+    font-family: var(--font-mono);
+    font-size: clamp(1.4rem, 3vw, 1.8rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-bright);
+    margin-bottom: var(--space-sm);
+    position: relative;
+}
+
+.recruit-pitch {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: var(--space-lg);
+}
+
+.recruit-perks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.recruit-perk {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.7rem var(--space-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition);
+}
+
+.recruit-perk:hover {
+    border-color: var(--amber);
+    background: var(--amber-dim);
+    transform: translateX(5px);
+}
+
+.perk-icon {
+    font-size: 0.85rem;
+    color: var(--green);
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.15);
+    margin-top: 2px;
+}
+
+.perk-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.perk-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+}
+
+.perk-desc {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+.recruit-form-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.recruit-terminal-intro {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.25rem;
+}
+
+.recruit-intro-text {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--green);
+    animation: blink 1.5s step-end infinite;
+}
+
+.recruit-disclaimer {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+    text-align: center;
+    line-height: 1.5;
+}
+
 /* --- COMMS (Contact) --- */
 .comms-layout {
     display: grid;
@@ -1474,6 +1751,18 @@ a { color: inherit; text-decoration: none; }
 .footer-copy {
     font-size: 0.7rem;
     color: var(--text-dim);
+}
+
+.footer-legal-link {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color var(--transition);
+}
+.footer-legal-link:hover {
+    color: var(--amber);
+    text-decoration: underline;
 }
 
 .footer-right { flex-shrink: 0; }
@@ -1855,6 +2144,18 @@ a { color: inherit; text-decoration: none; }
 
     .dossier-fields {
         grid-template-columns: 1fr;
+    }
+
+    .recruit-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .recruit-brief {
+        text-align: center;
+    }
+
+    .recruit-perks {
+        text-align: left;
     }
 
     .comms-layout {
