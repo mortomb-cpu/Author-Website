@@ -1,0 +1,2854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Moran Tomer">
+<meta name="creator" content="Moran Tomer">
+<meta name="copyright" content="Copyright 2026 Moran Tomer. All rights reserved.">
+<title>NIST CSF 2.0 Assessment Tool — by Moran Tomer</title>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+:root {
+  --bg: #0a0e17;
+  --surface: #111827;
+  --surface2: #1a2332;
+  --border: #2a3a4e;
+  --text: #e2e8f0;
+  --text-dim: #8899aa;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.3);
+  --tier1: #ef4444;
+  --tier2: #f59e0b;
+  --tier3: #3b82f6;
+  --tier4: #10b981;
+  --govern: #8b5cf6;
+  --identify: #3b82f6;
+  --protect: #10b981;
+  --detect: #f59e0b;
+  --respond: #ef4444;
+  --recover: #06b6d4;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Top Nav */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 14, 23, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topnav-brand {
+  font-weight: 700; font-size: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.topnav-brand .shield { font-size: 22px; }
+.topnav-progress {
+  flex: 1; max-width: 400px; margin: 0 24px;
+}
+.topnav-progress-bar {
+  height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden;
+}
+.topnav-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent), var(--tier4));
+  border-radius: 3px; transition: width 0.5s ease;
+}
+.topnav-progress-text {
+  font-size: 11px; color: var(--text-dim); margin-top: 2px; text-align: center;
+}
+.topnav-actions { display: flex; gap: 8px; }
+
+/* Buttons */
+.btn {
+  padding: 8px 18px; border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary {
+  background: var(--accent); color: #fff;
+}
+.btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--border); }
+.btn-lg { padding: 14px 32px; font-size: 16px; border-radius: 10px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* Main content */
+.main { padding-top: 56px; }
+
+/* Screens */
+.screen { display: none; min-height: calc(100vh - 56px); }
+.screen.active { display: block; }
+
+/* Welcome Screen */
+.welcome {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: calc(100vh - 56px);
+  padding: 40px 24px; text-align: center;
+}
+.welcome-shield {
+  font-size: 72px; margin-bottom: 24px;
+  filter: drop-shadow(0 0 40px var(--accent-glow));
+}
+.welcome h1 {
+  font-size: 36px; font-weight: 800; margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.welcome .subtitle {
+  font-size: 18px; color: var(--text-dim); margin-bottom: 40px;
+  max-width: 600px;
+}
+.welcome-form {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px;
+  width: 100%; max-width: 480px; text-align: left;
+}
+.welcome-form h3 { margin-bottom: 20px; font-size: 18px; }
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; font-size: 13px; color: var(--text-dim);
+  margin-bottom: 6px; font-weight: 500;
+}
+.form-group input, .form-group select {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text); font-size: 14px; outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--accent);
+}
+.welcome-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 32px; width: 100%; max-width: 480px;
+}
+.welcome-stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; text-align: center;
+}
+.welcome-stat .num {
+  font-size: 28px; font-weight: 800; color: var(--accent);
+}
+.welcome-stat .label { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+/* Assessment Screen */
+.assessment-container {
+  display: flex; min-height: calc(100vh - 56px);
+}
+.assessment-sidebar {
+  width: 280px; background: var(--surface); border-right: 1px solid var(--border);
+  padding: 20px 0; overflow-y: auto; position: fixed; top: 56px;
+  bottom: 0; left: 0;
+}
+.sidebar-section { margin-bottom: 4px; }
+.sidebar-function {
+  padding: 10px 20px; font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: background 0.2s; border-left: 3px solid transparent;
+}
+.sidebar-function:hover { background: var(--surface2); }
+.sidebar-function.active {
+  background: var(--surface2);
+}
+.sidebar-function .fn-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.sidebar-function .fn-score {
+  margin-left: auto; font-size: 11px; color: var(--text-dim);
+  font-weight: 400;
+}
+.sidebar-categories { display: none; }
+.sidebar-section.expanded .sidebar-categories { display: block; }
+.sidebar-category {
+  padding: 7px 20px 7px 40px; font-size: 12px; color: var(--text-dim);
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+  justify-content: space-between;
+}
+.sidebar-category:hover { color: var(--text); background: rgba(59,130,246,0.05); }
+.sidebar-category.active { color: var(--accent); background: rgba(59,130,246,0.08); }
+.sidebar-category.completed { color: var(--tier4); }
+.sidebar-cat-check { font-size: 10px; }
+
+.assessment-content {
+  flex: 1; margin-left: 280px; padding: 32px 40px;
+  max-width: 900px;
+}
+
+/* Category Header */
+.cat-header {
+  margin-bottom: 32px;
+}
+.cat-header .fn-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 12px;
+  font-weight: 600; margin-bottom: 12px;
+  border: 1px solid;
+}
+.cat-header h2 {
+  font-size: 24px; font-weight: 700; margin-bottom: 8px;
+}
+.cat-header p {
+  font-size: 14px; color: var(--text-dim); line-height: 1.6;
+}
+
+/* Question Card */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s;
+}
+.question-card.answered { border-color: rgba(16, 185, 129, 0.3); }
+.question-card .q-id {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  margin-bottom: 8px; font-family: 'Courier New', monospace;
+}
+.question-card .q-text {
+  font-size: 15px; line-height: 1.6; margin-bottom: 8px;
+}
+.question-card .q-hint {
+  font-size: 13px; line-height: 1.5; color: var(--text-dim);
+  margin-bottom: 16px; padding: 10px 14px;
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+}
+.tier-options {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.tier-option {
+  padding: 12px 16px; border-radius: 8px; cursor: pointer;
+  border: 2px solid var(--border); background: var(--surface2);
+  transition: all 0.2s; position: relative;
+}
+.tier-option:hover {
+  border-color: var(--accent); background: rgba(59,130,246,0.05);
+}
+.tier-option.selected {
+  border-color: currentColor;
+}
+.tier-option.selected.t1 { border-color: var(--tier1); background: rgba(239,68,68,0.1); color: var(--tier1); }
+.tier-option.selected.t2 { border-color: var(--tier2); background: rgba(245,158,11,0.1); color: var(--tier2); }
+.tier-option.selected.t3 { border-color: var(--tier3); background: rgba(59,130,246,0.1); color: var(--tier3); }
+.tier-option.selected.t4 { border-color: var(--tier4); background: rgba(16,185,129,0.1); color: var(--tier4); }
+.tier-option .tier-label {
+  font-weight: 700; font-size: 14px; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tier-option .tier-num {
+  width: 22px; height: 22px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 12px;
+  border: 2px solid currentColor; font-weight: 800;
+}
+.tier-option .tier-desc {
+  font-size: 12px; color: var(--text-dim); line-height: 1.4;
+}
+.tier-option.selected .tier-desc { color: inherit; opacity: 0.8; }
+
+/* Navigation */
+.cat-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+}
+.cat-nav .cat-progress {
+  font-size: 13px; color: var(--text-dim);
+}
+
+/* Results Screen */
+.results {
+  padding: 40px 24px;
+}
+.results-header {
+  text-align: center; margin-bottom: 48px;
+}
+.results-header h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+.results-header .org-name { font-size: 18px; color: var(--accent); }
+.results-header .date { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+.results-grid {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+}
+.results-grid .full-width { grid-column: 1 / -1; }
+
+.result-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+}
+.result-card h3 {
+  font-size: 16px; font-weight: 700; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Overall Score */
+.overall-score {
+  text-align: center; padding: 40px;
+}
+.score-ring {
+  position: relative; width: 200px; height: 200px; margin: 0 auto 20px;
+}
+.score-ring svg { transform: rotate(-90deg); }
+.score-ring .score-value {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px; font-weight: 800;
+}
+.score-ring .score-label {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, calc(-50% + 30px));
+  font-size: 14px; color: var(--text-dim);
+}
+
+/* Function Scores */
+.fn-score-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.fn-score-row:last-child { border-bottom: none; }
+.fn-score-row .fn-name {
+  width: 100px; font-size: 13px; font-weight: 600;
+}
+.fn-score-row .fn-bar-wrap {
+  flex: 1; height: 24px; background: var(--surface2);
+  border-radius: 12px; overflow: hidden; position: relative;
+}
+.fn-score-row .fn-bar {
+  height: 100%; border-radius: 12px;
+  transition: width 1s ease;
+}
+.fn-score-row .fn-val {
+  width: 50px; text-align: right; font-weight: 700; font-size: 16px;
+}
+
+/* Radar Chart */
+.radar-container {
+  display: flex; justify-content: center; padding: 20px 0;
+}
+
+/* Category Detail Table */
+.cat-detail-table {
+  width: 100%; border-collapse: collapse;
+}
+.cat-detail-table th {
+  text-align: left; padding: 10px 12px; font-size: 12px;
+  color: var(--text-dim); border-bottom: 2px solid var(--border);
+  font-weight: 600;
+}
+.cat-detail-table td {
+  padding: 10px 12px; font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.cat-detail-table tr:hover { background: var(--surface2); }
+.tier-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 10px; border-radius: 12px; font-size: 12px;
+  font-weight: 700;
+}
+.tier-badge.t1 { background: rgba(239,68,68,0.15); color: var(--tier1); }
+.tier-badge.t2 { background: rgba(245,158,11,0.15); color: var(--tier2); }
+.tier-badge.t3 { background: rgba(59,130,246,0.15); color: var(--tier3); }
+.tier-badge.t4 { background: rgba(16,185,129,0.15); color: var(--tier4); }
+
+/* Recommendations */
+.rec-item {
+  padding: 16px; background: var(--surface2);
+  border-radius: 8px; margin-bottom: 10px;
+  border-left: 3px solid;
+}
+.rec-item .rec-priority {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.rec-item .rec-text { font-size: 13px; line-height: 1.5; }
+
+/* Export bar */
+.export-bar {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  padding: 32px 16px;
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+.export-bar .btn {
+  min-width: 160px; justify-content: center;
+}
+
+/* N/A option */
+.tier-option.na-option {
+  grid-column: 1 / -1;
+  background: transparent;
+  border-style: dashed;
+}
+.tier-option.selected.tna {
+  border-color: var(--text-dim);
+  background: rgba(136, 153, 170, 0.1);
+  color: var(--text-dim);
+}
+
+/* Benchmark comparison */
+.bench-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.bench-row:last-child { border-bottom: none; }
+.bench-row .bench-name { width: 100px; font-size: 13px; font-weight: 600; }
+.bench-bar-wrap {
+  flex: 1; position: relative; height: 32px;
+  background: var(--surface2); border-radius: 8px; overflow: visible;
+}
+.bench-bar {
+  height: 16px; border-radius: 8px; position: absolute; top: 0; left: 0;
+  transition: width 1s ease;
+}
+.bench-bar.yours { top: 0; z-index: 2; }
+.bench-bar.industry { top: 16px; z-index: 1; opacity: 0.5; }
+.bench-marker {
+  position: absolute; top: 0; height: 32px; width: 2px;
+  background: #fff; z-index: 3;
+}
+.bench-vals {
+  width: 100px; text-align: right; font-size: 12px; line-height: 1.6;
+}
+.bench-vals .yours-val { font-weight: 700; }
+.bench-vals .ind-val { color: var(--text-dim); }
+.bench-legend {
+  display: flex; gap: 20px; margin-bottom: 16px; font-size: 12px; color: var(--text-dim);
+}
+.bench-legend span {
+  display: flex; align-items: center; gap: 6px;
+}
+.bench-legend .dot {
+  width: 12px; height: 8px; border-radius: 4px;
+}
+.bench-delta {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+.bench-delta.positive { background: rgba(16,185,129,0.15); color: var(--tier4); }
+.bench-delta.negative { background: rgba(239,68,68,0.15); color: var(--tier1); }
+.bench-delta.neutral { background: rgba(245,158,11,0.15); color: var(--tier2); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .assessment-sidebar { display: none; }
+  .assessment-content { margin-left: 0; padding: 20px; }
+  .tier-options { grid-template-columns: 1fr; }
+  .results-grid { grid-template-columns: 1fr; }
+  .welcome-stats { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Print */
+@media print {
+  .topnav, .cat-nav, .export-bar, .btn, .session-bar { display: none !important; }
+  .screen { display: block !important; }
+  body { background: #fff; color: #000; }
+  .result-card { border: 1px solid #ccc; break-inside: avoid; }
+}
+
+/* Session Bar */
+.session-bar {
+  position: fixed; top: 56px; left: 0; right: 0; z-index: 99;
+  background: rgba(26, 35, 50, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 40px;
+  display: none; align-items: center; gap: 16px;
+  font-size: 13px;
+}
+.session-bar.visible { display: flex; }
+.session-bar .session-code {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 4px 12px; border-radius: 6px; font-family: 'Courier New', monospace;
+  font-weight: 700; font-size: 14px; letter-spacing: 2px; color: var(--accent);
+  cursor: pointer; user-select: all;
+}
+.session-bar .session-code:hover { border-color: var(--accent); }
+.session-bar .copy-link-btn {
+  background: none; border: 1px solid var(--border); color: var(--text-dim);
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  transition: all 0.2s;
+}
+.session-bar .copy-link-btn:hover { border-color: var(--accent); color: var(--text); }
+.session-bar .presence-avatars {
+  display: flex; gap: 4px; margin-left: auto; align-items: center;
+}
+.presence-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  border: 2px solid var(--bg); position: relative; cursor: default;
+}
+.presence-avatar .avatar-tooltip {
+  display: none; position: absolute; bottom: 36px; left: 50%;
+  transform: translateX(-50%); background: var(--surface);
+  border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; white-space: nowrap; color: var(--text); font-weight: 400;
+  z-index: 10;
+}
+.presence-avatar:hover .avatar-tooltip { display: block; }
+.session-bar .leave-btn {
+  background: none; border: 1px solid rgba(239,68,68,0.3); color: var(--tier1);
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  transition: all 0.2s;
+}
+.session-bar .leave-btn:hover { background: rgba(239,68,68,0.1); border-color: var(--tier1); }
+
+/* Adjust layout when session bar is visible */
+body.collab-active .main { padding-top: 96px; }
+body.collab-active .assessment-sidebar { top: 96px; }
+
+/* Collaboration Modal */
+.collab-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.collab-modal-overlay.visible { display: flex; }
+.collab-modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px; width: 100%;
+  max-width: 440px; text-align: center;
+}
+.collab-modal h3 { font-size: 20px; margin-bottom: 8px; }
+.collab-modal .modal-subtitle {
+  font-size: 13px; color: var(--text-dim); margin-bottom: 24px;
+}
+.collab-modal .join-input {
+  width: 100%; padding: 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text); font-size: 20px; text-align: center;
+  letter-spacing: 6px; font-family: 'Courier New', monospace;
+  font-weight: 700; outline: none; text-transform: uppercase;
+}
+.collab-modal .join-input:focus { border-color: var(--accent); }
+.collab-modal .join-input::placeholder {
+  letter-spacing: 2px; font-size: 14px; color: var(--text-dim);
+}
+.collab-modal .name-input {
+  width: 100%; padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text); font-size: 14px; outline: none; margin-bottom: 16px;
+}
+.collab-modal .name-input:focus { border-color: var(--accent); }
+.collab-modal .modal-actions {
+  display: flex; gap: 8px; margin-top: 16px;
+}
+.collab-modal .modal-actions .btn { flex: 1; justify-content: center; }
+.collab-modal .error-msg {
+  color: var(--tier1); font-size: 12px; margin-top: 8px; min-height: 18px;
+}
+
+/* Welcome collab section */
+.welcome-collab-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--text-dim); font-size: 13px;
+}
+.welcome-collab-divider::before, .welcome-collab-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.welcome-collab-buttons {
+  display: flex; gap: 8px;
+}
+.welcome-collab-buttons .btn { flex: 1; justify-content: center; }
+
+/* Answer attribution */
+.answer-by {
+  font-size: 11px; color: var(--text-dim); margin-top: 8px;
+  font-style: italic;
+}
+
+/* Remote answer flash animation */
+@keyframes remoteFlash {
+  0% { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+  100% { border-color: rgba(16, 185, 129, 0.3); box-shadow: none; }
+}
+.question-card.remote-flash {
+  animation: remoteFlash 1.5s ease;
+}
+
+/* Sidebar presence dots */
+.sidebar-presence-dots {
+  display: flex; gap: 2px; margin-left: 4px;
+}
+.sidebar-presence-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+
+/* Firebase status indicator */
+.firebase-status {
+  font-size: 11px; color: var(--text-dim);
+  display: flex; align-items: center; gap: 4px;
+}
+.firebase-status .status-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--tier4);
+}
+.firebase-status .status-dot.offline { background: var(--tier1); }
+</style>
+</head>
+<body>
+
+<!-- Top Navigation -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <span class="shield">&#128737;</span>
+    NIST CSF 2.0 Assessment <span style="font-weight:400; font-size:11px; color:var(--text-dim); margin-left:6px;">by Moran Tomer</span>
+  </div>
+  <div class="topnav-progress" id="topProgress" style="display:none;">
+    <div class="topnav-progress-bar">
+      <div class="topnav-progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="topnav-progress-text" id="progressText">0 of 106 answered</div>
+  </div>
+  <div class="topnav-actions">
+    <button class="btn btn-secondary" id="btnSave" style="display:none;" onclick="saveProgress()">&#128190; Save</button>
+    <button class="btn btn-secondary" id="btnLoad" onclick="loadProgress()">&#128194; Load</button>
+  </div>
+</nav>
+
+<!-- Session Bar (visible during collaborative sessions) -->
+<div class="session-bar" id="sessionBar">
+  <span class="firebase-status" id="firebaseStatus"><span class="status-dot"></span> Live</span>
+  <span style="color:var(--text-dim);">Session:</span>
+  <span class="session-code" id="sessionCode" title="Click to copy" onclick="copySessionCode()">------</span>
+  <button class="copy-link-btn" onclick="copySessionLink()">Copy Invite Link</button>
+  <div class="presence-avatars" id="presenceAvatars"></div>
+  <button class="leave-btn" onclick="leaveSession()">Leave Session</button>
+</div>
+
+<!-- Join Session Modal -->
+<div class="collab-modal-overlay" id="joinModal">
+  <div class="collab-modal">
+    <h3 id="collabModalTitle">Join Collaborative Session</h3>
+    <p class="modal-subtitle" id="collabModalSubtitle">Enter the session code shared by your team lead</p>
+    <div id="collabModalBody">
+      <input type="text" class="name-input" id="collabName" placeholder="Your display name" maxlength="30">
+      <input type="text" class="join-input" id="joinCode" placeholder="ABC123" maxlength="6">
+      <div class="error-msg" id="joinError"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeCollabModal()">Cancel</button>
+        <button class="btn btn-primary" id="joinBtn" onclick="joinSession()">Join Session</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Welcome Screen -->
+  <div class="screen active" id="screenWelcome">
+    <div class="welcome">
+      <div class="welcome-shield">&#128737;</div>
+      <h1>NIST CSF 2.0 Assessment</h1>
+      <p class="subtitle">
+        A guided, interactive assessment tool based on the NIST Cybersecurity Framework 2.0.
+        Evaluate your organization across all 6 functions and receive a comprehensive maturity score.
+      </p>
+      <p style="font-size:13px; color:var(--text-dim); margin-bottom:24px;">Developed by <strong style="color:var(--accent);">Moran Tomer</strong></p>
+      <div class="welcome-form">
+        <h3>Organization Details</h3>
+        <div class="form-group">
+          <label>Organization Name *</label>
+          <input type="text" id="orgName" placeholder="e.g., Acme Corporation" required>
+        </div>
+        <div class="form-group">
+          <label>Industry</label>
+          <select id="orgIndustry">
+            <option value="">Select industry...</option>
+            <option>Financial Services</option>
+            <option>Healthcare</option>
+            <option>Technology</option>
+            <option>IoT & Connected Devices</option>
+            <option>Manufacturing</option>
+            <option>Energy & Utilities</option>
+            <option>Government</option>
+            <option>Retail & E-commerce</option>
+            <option>Education</option>
+            <option>Telecommunications</option>
+            <option>Defense & Aerospace</option>
+            <option>Transportation</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assessor Name</label>
+          <input type="text" id="assessorName" placeholder="Your name">
+        </div>
+        <button class="btn btn-primary btn-lg" style="width:100%; margin-top:8px;" onclick="startAssessment()">
+          Begin Solo Assessment &#8594;
+        </button>
+        <div class="welcome-collab-divider">or collaborate with your team</div>
+        <div class="welcome-collab-buttons">
+          <button class="btn btn-primary" style="background:linear-gradient(135deg, #8b5cf6, #3b82f6);" onclick="startCollaborativeSession()">
+            &#128101; Start Team Session
+          </button>
+          <button class="btn btn-secondary" onclick="openJoinModal()">
+            &#128279; Join Session
+          </button>
+        </div>
+      </div>
+      <div class="welcome-stats">
+        <div class="welcome-stat"><div class="num">6</div><div class="label">Functions</div></div>
+        <div class="welcome-stat"><div class="num">22</div><div class="label">Categories</div></div>
+        <div class="welcome-stat"><div class="num">106</div><div class="label">Subcategories</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assessment Screen -->
+  <div class="screen" id="screenAssessment">
+    <div class="assessment-container">
+      <div class="assessment-sidebar" id="sidebar"></div>
+      <div class="assessment-content" id="assessmentContent"></div>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div class="screen" id="screenResults">
+    <div class="results" id="resultsContent"></div>
+  </div>
+</div>
+
+<!-- Persistent Copyright Footer -->
+<footer style="text-align:center; padding:16px; color:var(--text-dim); font-size:11px; border-top:1px solid var(--border); background:var(--surface);">
+  &copy; 2026 Moran Tomer. All rights reserved. | NIST CSF 2.0 Assessment Tool
+</footer>
+
+<script>
+// ====== NIST CSF 2.0 DATA — Plain Language Edition ======
+// Every question is written so a non-technical manager can understand exactly what is being asked.
+// Each question includes contextual tier descriptions that describe real-world scenarios.
+const CSF_DATA = [
+  {
+    id: "GV", name: "Govern", color: "#8b5cf6",
+    desc: "How well does your organization's leadership set the direction for cybersecurity? This section looks at whether security is part of your business strategy, who is in charge, and whether there are clear rules everyone follows.",
+    categories: [
+      { id: "GV.OC", name: "Organizational Context", desc: "Does your organization understand its own business well enough to make smart security decisions? These questions check whether you know what matters most, what rules you must follow, and what you depend on.",
+        subs: [
+          { id: "GV.OC-01",
+            text: "Does your organization's mission and business goals guide your security decisions?",
+            hint: "For example: A hospital knows patient safety is #1, so it prioritizes protecting medical systems over office Wi-Fi.",
+            tiers: ["We don't really connect our business goals to security decisions", "Some leaders think about business goals when making security decisions, but it's not a standard practice", "Our security priorities are clearly based on our business goals, and this is documented and followed", "Our security strategy automatically adjusts when business goals change, with real-time alignment"]
+          },
+          { id: "GV.OC-02",
+            text: "Do you know who your key stakeholders are (customers, partners, regulators, employees) and what they expect from you regarding security?",
+            hint: "For example: Your customers expect their data to be safe. Your board expects regular security updates. A partner requires you to meet certain security standards.",
+            tiers: ["We haven't really mapped out who our stakeholders are or what they expect from us on security", "We know some of our key stakeholders and their expectations, but haven't documented them all", "We have a clear list of all stakeholders and their security expectations, and we regularly review it", "We proactively engage with stakeholders, anticipate their evolving needs, and adjust our security approach before they even ask"]
+          },
+          { id: "GV.OC-03",
+            text: "Do you know what laws, regulations, and contracts require you to do regarding security and privacy?",
+            hint: "For example: GDPR for European customer data, HIPAA for health data, PCI-DSS if you handle credit cards, or specific clauses in your client contracts.",
+            tiers: ["We're not sure what all our legal and regulatory obligations are for security and privacy", "We know about some of our obligations but haven't fully mapped them all or tracked compliance", "We have a complete list of all security/privacy laws and contract requirements that apply to us, with assigned owners", "We continuously monitor for new and changing regulations, and our compliance processes adapt automatically"]
+          },
+          { id: "GV.OC-04",
+            text: "Do you know which of your services and capabilities are most critical — the ones your customers and stakeholders depend on the most?",
+            hint: "For example: An e-commerce company knows its payment system and website are critical. A bank knows wire transfers and online banking are essential.",
+            tiers: ["We haven't identified which services are most critical to our stakeholders", "Some teams know what's critical, but there's no organization-wide agreement or documentation", "We have a documented list of critical services, everyone knows what they are, and security efforts focus on protecting them", "We continuously reassess criticality as our business evolves and automatically shift security resources to match"]
+          },
+          { id: "GV.OC-05",
+            text: "Do you know what external services, vendors, and infrastructure your organization depends on to operate?",
+            hint: "For example: Your cloud provider (AWS, Azure), internet service provider, payroll provider, email service — if any of these goes down, can you still operate?",
+            tiers: ["We don't have a clear picture of what external services we depend on", "We know about some key dependencies but haven't fully documented or communicated them", "We have a documented list of all critical dependencies, and everyone who needs to know is aware", "We continuously monitor our dependencies, have backup plans for each, and automatically detect when new dependencies are added"]
+          }
+        ]
+      },
+      { id: "GV.RM", name: "Risk Management Strategy", desc: "Does your organization have a clear plan for how it handles security risks? These questions check whether leadership has agreed on how much risk is acceptable and how to deal with it.",
+        subs: [
+          { id: "GV.RM-01",
+            text: "Has your leadership agreed on clear goals for managing security risks?",
+            hint: "For example: 'We will reduce the chance of a data breach to less than X%' or 'We will comply with all industry security standards within 12 months.'",
+            tiers: ["No formal security risk goals exist — we deal with things as they come up", "Some leaders have discussed goals, but they're not formally agreed upon or written down", "We have clearly documented security risk goals that leadership has signed off on", "Our risk goals are regularly updated based on performance data, and leadership reviews them alongside other business objectives"]
+          },
+          { id: "GV.RM-02",
+            text: "Has your organization defined how much security risk it is willing to accept?",
+            hint: "For example: 'We accept the risk of not encrypting internal memos, but we have zero tolerance for unencrypted customer financial data.'",
+            tiers: ["We haven't defined what level of risk is acceptable — it's decided case by case", "There are some informal understandings about risk tolerance, but nothing written down or communicated widely", "We have clear, documented statements about what risks we will and won't accept, and everyone knows them", "Our risk tolerance is continuously refined using data from incidents, near-misses, and industry trends"]
+          },
+          { id: "GV.RM-03",
+            text: "Is cybersecurity risk treated as part of your overall business risk — alongside financial, legal, and operational risks?",
+            hint: "For example: When leadership reviews business risks quarterly, does cybersecurity appear on the same report as financial and legal risks?",
+            tiers: ["Cybersecurity is handled separately from other business risks — it's mainly an IT concern", "There's some connection, but cybersecurity risks aren't consistently included in business risk discussions", "Cybersecurity is formally part of our overall business risk management process and reported alongside other risks", "Cybersecurity risk is fully integrated — leadership tracks it in real time alongside financial and operational risks"]
+          },
+          { id: "GV.RM-04",
+            text: "When a security risk is found, does your organization have clear options for what to do about it (fix it, accept it, transfer it, or avoid it)?",
+            hint: "For example: We can fix a vulnerability (patch it), accept a low risk (document and monitor it), transfer it (buy insurance), or avoid it (stop using the risky system).",
+            tiers: ["We don't have a standard approach — people handle risks however they see fit", "Some guidelines exist but aren't consistently followed across the organization", "We have a documented set of risk response options that everyone follows, with clear escalation paths", "Our risk response process automatically recommends the best option based on data analysis and past outcomes"]
+          },
+          { id: "GV.RM-05",
+            text: "Are there clear communication channels for reporting security risks — including risks from vendors and partners?",
+            hint: "For example: Does everyone know who to tell if they spot a security issue? Is there a process for vendors to report problems to you?",
+            tiers: ["There's no clear way to report security risks — people figure it out on their own", "Some reporting channels exist but they're not well-known or consistently used", "We have clearly defined reporting channels for security risks (internal and from vendors), and everyone knows how to use them", "Our risk communication is real-time, automated where possible, and includes feedback loops so reporters know what happened"]
+          },
+          { id: "GV.RM-06",
+            text: "Does your organization have a standard way to measure and prioritize security risks?",
+            hint: "For example: Do you use a consistent scoring system (like High/Medium/Low or a numerical scale) so everyone evaluates risks the same way?",
+            tiers: ["Different people assess risks differently — there's no standard method", "We have some guidelines, but they're not consistently applied across all teams", "We have a standardized risk scoring method that everyone uses, with clear documentation", "Our risk scoring is enhanced with automated data feeds and continuously validated against real-world outcomes"]
+          },
+          { id: "GV.RM-07",
+            text: "Does your organization consider the business opportunities that good security can create (not just the threats)?",
+            hint: "For example: Strong security can be a selling point to customers, enable you to enter regulated markets, or give you a competitive advantage.",
+            tiers: ["We only think of security as a cost or a problem to solve", "Occasionally someone mentions security as a business advantage, but it's not a regular discussion", "We formally consider security as a business enabler and include it in strategic planning discussions", "We actively market our security posture as a competitive advantage and measure the business value it creates"]
+          }
+        ]
+      },
+      { id: "GV.RR", name: "Roles, Responsibilities & Authorities", desc: "Does everyone know who is responsible for what when it comes to security? These questions check whether there's clear ownership and enough people and money dedicated to security.",
+        subs: [
+          { id: "GV.RR-01",
+            text: "Does your senior leadership take personal responsibility for cybersecurity, and do they promote a culture where everyone cares about security?",
+            hint: "For example: Does the CEO or board discuss security regularly? Do leaders model good security behavior (not sharing passwords, not bypassing rules)?",
+            tiers: ["Leadership sees security as purely an IT issue — they're not personally involved", "Some leaders are engaged, but it's not consistent and there's no security-aware culture from the top", "Leadership actively champions security, regularly discusses it, and sets an example for the entire organization", "Leadership treats security as a core business value, ties it to performance reviews, and drives a culture of continuous improvement"]
+          },
+          { id: "GV.RR-02",
+            text: "Is it clear who is responsible for what in cybersecurity — and does everyone actually know their role?",
+            hint: "For example: Who decides on security budgets? Who approves new tools? Who responds to incidents? Can you name these people right now?",
+            tiers: ["Security responsibilities aren't clearly defined — it's unclear who does what", "Some roles are defined but not everyone knows about them, and they're not enforced", "All security roles and responsibilities are clearly documented, communicated, and people are held accountable", "Roles are regularly reviewed, adjusted based on organizational changes, and performance is measured"]
+          },
+          { id: "GV.RR-03",
+            text: "Does your organization invest enough budget, staff, and tools in cybersecurity to match its security goals?",
+            hint: "For example: If leadership says security is a top priority but there's only one IT person handling it part-time, resources don't match the goals.",
+            tiers: ["Security resources are minimal or ad hoc — we invest only when something goes wrong", "There's some dedicated budget, but it doesn't consistently match our stated security goals", "Our security budget and staffing are formally planned and aligned with our risk strategy", "Resources are dynamically adjusted based on changing threats and business needs, with clear metrics showing ROI"]
+          },
+          { id: "GV.RR-04",
+            text: "Does your HR process include cybersecurity — like background checks, security training for new hires, and security responsibilities in job descriptions?",
+            hint: "For example: Do new employees get security training on day one? Are there security checks when someone leaves the company? Are security responsibilities listed in job descriptions?",
+            tiers: ["HR processes don't really address cybersecurity", "Some HR practices include security (like basic onboarding training), but it's not comprehensive", "Security is built into our HR processes — hiring, onboarding, role changes, and offboarding all include security steps", "HR and security are tightly integrated with automated access provisioning/deprovisioning and continuous skills assessment"]
+          }
+        ]
+      },
+      { id: "GV.PO", name: "Policy", desc: "Does your organization have written security rules, and does everyone follow them? These questions check whether you have actual policies and whether they stay up to date.",
+        subs: [
+          { id: "GV.PO-01",
+            text: "Does your organization have written security policies that people actually know about and follow?",
+            hint: "For example: An acceptable use policy, a password policy, a data handling policy — and employees have read and acknowledged them.",
+            tiers: ["We have no formal written security policies, or they exist but nobody follows them", "We have some policies, but they're not comprehensive, well-known, or consistently enforced", "We have comprehensive security policies that are communicated to everyone and actively enforced", "Our policies are living documents that are regularly tested for effectiveness and automatically updated"]
+          },
+          { id: "GV.PO-02",
+            text: "Are your security policies regularly reviewed and updated when things change — like new threats, new technology, or new business needs?",
+            hint: "For example: If you moved to cloud services last year, have your security policies been updated to cover cloud-specific risks?",
+            tiers: ["Our policies are outdated or have never been reviewed since they were first written", "Policies are updated occasionally, but there's no regular review schedule", "Policies are reviewed on a set schedule (e.g., annually) and updated whenever significant changes occur", "Policies are continuously monitored for relevance and automatically flagged for review when threats or technology change"]
+          }
+        ]
+      },
+      { id: "GV.OV", name: "Oversight", desc: "Does leadership actually check whether your security efforts are working? These questions are about whether someone is monitoring the results and making adjustments.",
+        subs: [
+          { id: "GV.OV-01",
+            text: "Does leadership regularly review the results of your security program to see if the strategy is working?",
+            hint: "For example: Are there quarterly reports to the board showing security metrics, incident trends, and whether goals are being met?",
+            tiers: ["Leadership doesn't review security results — there's no reporting process", "Some reporting happens, but it's irregular and doesn't consistently lead to strategy changes", "Leadership receives regular security reports and uses them to adjust strategy and priorities", "Real-time dashboards give leadership continuous visibility, and strategy adjustments happen proactively"]
+          },
+          { id: "GV.OV-02",
+            text: "Is your security strategy reviewed to make sure it covers all the risks your organization actually faces?",
+            hint: "For example: If your organization expanded to a new country, started using AI, or moved to remote work — was your security strategy updated to cover these changes?",
+            tiers: ["Our security strategy hasn't been reviewed for gaps in a long time (or ever)", "We review the strategy occasionally but don't systematically check for coverage gaps", "We regularly review our strategy against our actual risk landscape and close any gaps we find", "Our strategy is continuously validated against emerging risks, and gaps are identified and addressed automatically"]
+          },
+          { id: "GV.OV-03",
+            text: "Does your organization measure how well its cybersecurity program is actually performing?",
+            hint: "For example: Do you track metrics like 'time to patch critical vulnerabilities,' 'number of phishing clicks,' or 'percentage of systems with up-to-date protection'?",
+            tiers: ["We don't measure security performance — we just react when something goes wrong", "We track some metrics informally, but there's no structured performance measurement", "We have defined security KPIs that are regularly measured, reported, and used to drive improvements", "Performance metrics are tracked in real time, benchmarked against industry standards, and automatically trigger improvement actions"]
+          }
+        ]
+      },
+      { id: "GV.SC", name: "Vendor & Supply Chain Security", desc: "How well do you manage the security risks that come from your vendors, suppliers, and partners? If a vendor gets hacked, it can affect you too. These questions check whether you're managing that risk.",
+        subs: [
+          { id: "GV.SC-01",
+            text: "Does your organization have a program for managing security risks from vendors and suppliers?",
+            hint: "For example: Do you have a process for evaluating vendor security before signing contracts? A policy for how vendors must handle your data?",
+            tiers: ["We don't have any formal program for managing vendor security risks", "We do some vendor security checks, but it's not a structured program with clear policies", "We have a formal vendor security program with documented policies, and stakeholders have agreed to it", "Our vendor security program is continuously improved using data from audits, incidents, and industry best practices"]
+          },
+          { id: "GV.SC-02",
+            text: "Have you clearly defined what your vendors and partners are responsible for regarding security — and do they know it?",
+            hint: "For example: Your cloud provider knows they must encrypt your data. Your cleaning company knows they can't access server rooms without an escort.",
+            tiers: ["We haven't defined security roles and responsibilities for our vendors", "Some vendor responsibilities are defined, but it's inconsistent and not well-coordinated", "Security roles and responsibilities are clearly defined for all key vendors and communicated both internally and externally", "Vendor responsibilities are continuously monitored, with automated compliance checks and regular collaborative reviews"]
+          },
+          { id: "GV.SC-03",
+            text: "Is vendor/supplier security risk included as part of your overall risk management process?",
+            hint: "For example: When your leadership reviews business risks, do supply chain security risks appear alongside financial and operational risks?",
+            tiers: ["Vendor security risk is not part of our overall risk management", "It's considered sometimes, but not consistently included in our risk management process", "Vendor security risk is formally integrated into our overall risk management and improvement processes", "Vendor risks are continuously monitored in real time and automatically feed into our overall risk picture"]
+          },
+          { id: "GV.SC-04",
+            text: "Do you have a list of all your suppliers, and do you know which ones are most critical to your business?",
+            hint: "For example: Can you list your top 10 most important vendors? Do you know which ones, if compromised, would seriously impact your business?",
+            tiers: ["We don't have a complete list of our suppliers or know which are most critical", "We have a partial list, but haven't systematically ranked suppliers by importance", "All suppliers are inventoried and ranked by how critical they are to our business operations", "Our supplier inventory is automatically maintained, criticality is reassessed in real time, and changes trigger security reviews"]
+          },
+          { id: "GV.SC-05",
+            text: "Do your contracts with vendors include specific security requirements?",
+            hint: "For example: 'The vendor must encrypt all our data,' 'The vendor must notify us within 24 hours of a breach,' 'The vendor must pass an annual security audit.'",
+            tiers: ["Our contracts don't include specific security requirements", "Some contracts include basic security language, but it's not consistent across all vendors", "All vendor contracts include standardized security requirements based on the vendor's risk level", "Contract security requirements are continuously updated based on emerging threats and are tied to measurable performance standards"]
+          },
+          { id: "GV.SC-06",
+            text: "Before you start working with a new vendor, do you check out their security practices first?",
+            hint: "For example: Do you send a security questionnaire? Review their certifications (SOC 2, ISO 27001)? Check if they've had recent breaches?",
+            tiers: ["We don't evaluate vendor security before starting a relationship", "We sometimes check vendor security, but there's no formal due diligence process", "We have a formal security evaluation process that every new vendor must go through before we engage", "Our due diligence includes automated security scoring, continuous monitoring from day one, and risk-based onboarding"]
+          },
+          { id: "GV.SC-07",
+            text: "Do you continuously monitor the security risks from your vendors throughout the entire relationship — not just when you first signed the contract?",
+            hint: "For example: Do you re-assess vendor security annually? Get notified if a vendor has a breach? Track whether they're meeting their security obligations?",
+            tiers: ["We don't monitor vendor security after the initial engagement", "We check in with vendors occasionally, but there's no systematic ongoing monitoring", "We regularly reassess vendor security risks and track whether vendors meet their security obligations", "Vendor security is continuously monitored with automated alerts, and risk assessments are updated in real time"]
+          },
+          { id: "GV.SC-08",
+            text: "Are your important vendors included in your plans for handling security incidents?",
+            hint: "For example: If you have a breach that involves a vendor's system, do you know who to call at that vendor? Have you practiced responding together?",
+            tiers: ["Vendors are not included in our incident response planning", "Some key vendors are loosely involved, but there's no formal inclusion in our incident plans", "Important vendors are formally included in our incident response plans, with defined roles and contact procedures", "We regularly conduct joint incident response exercises with key vendors and continuously update shared playbooks"]
+          },
+          { id: "GV.SC-09",
+            text: "Do you track the security of products and services you buy from vendors throughout their entire lifecycle — from purchase to retirement?",
+            hint: "For example: When a vendor stops supporting a product, do you know about it? Do you track whether vendor software is still getting security updates?",
+            tiers: ["We don't track vendor product security over time", "We track some products but don't have a comprehensive lifecycle approach", "We track security of all vendor products from procurement through retirement, with regular reviews", "Lifecycle tracking is automated, with alerts for end-of-life products and proactive migration planning"]
+          },
+          { id: "GV.SC-10",
+            text: "When a vendor relationship ends, do you have a plan for securely wrapping things up?",
+            hint: "For example: Getting your data back, making sure the vendor deletes your data, revoking their access to your systems, retrieving any equipment.",
+            tiers: ["We have no plan for when vendor relationships end — we figure it out as we go", "We handle some offboarding steps, but it's not a formal process", "We have a documented offboarding process that ensures secure data return, deletion, and access revocation", "Our offboarding process is automated where possible, with verification steps and compliance confirmation"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "ID", name: "Identify", color: "#3b82f6",
+    desc: "Do you know what you have and what could go wrong? This section checks whether you understand your assets (computers, data, systems), the threats you face, and where you need to improve.",
+    categories: [
+      { id: "ID.AM", name: "Asset Management", desc: "Do you know what technology and data you have? You can't protect what you don't know about. These questions check whether you have a clear picture of your hardware, software, data, and services.",
+        subs: [
+          { id: "ID.AM-01",
+            text: "Do you keep an up-to-date list of all hardware your organization uses (computers, servers, phones, network equipment, etc.)?",
+            hint: "For example: Can you account for every laptop, server, router, and mobile device your company owns or manages?",
+            tiers: ["We don't have an inventory — we're not sure what hardware we have", "We have a partial list, but it's not complete or regularly updated", "We maintain a complete, regularly updated inventory of all hardware with owners assigned", "Our hardware inventory is automatically maintained with real-time discovery — new devices are detected and cataloged instantly"]
+          },
+          { id: "ID.AM-02",
+            text: "Do you keep an up-to-date list of all software, cloud services, and systems your organization uses?",
+            hint: "For example: Do you know every application, SaaS service, and system running in your environment — including ones employees signed up for on their own?",
+            tiers: ["We don't have a complete picture of what software and services we use", "We know about major systems, but there's probably software and services we don't know about", "We maintain a complete inventory of all software, cloud services, and systems, regularly updated", "Our software inventory is automated with real-time discovery that catches unauthorized or unknown applications"]
+          },
+          { id: "ID.AM-03",
+            text: "Do you have a map or diagram of how data flows through your network — both inside your organization and to/from external parties?",
+            hint: "For example: Do you know how customer data moves from your website to your database to your backup system? Where data goes when shared with partners?",
+            tiers: ["We don't have any documentation of our network or data flows", "We have some network diagrams, but they're incomplete or outdated", "We have complete, current network diagrams and data flow maps that are regularly reviewed", "Our network and data flow documentation is automatically generated and updated whenever changes occur"]
+          },
+          { id: "ID.AM-04",
+            text: "Do you keep a list of all services and products that your vendors provide to you?",
+            hint: "For example: Cloud hosting, email service, payroll processing, cybersecurity tools, marketing platforms — are these all tracked in one place?",
+            tiers: ["We don't track what services our vendors provide in any organized way", "We know about some vendor services, but there's no central inventory", "We maintain a complete list of all vendor-provided services, with contracts and owners documented", "Our vendor service inventory is automatically maintained and linked to our risk and contract management systems"]
+          },
+          { id: "ID.AM-05",
+            text: "Have you ranked your assets by how important they are — which ones, if lost or compromised, would hurt the business most?",
+            hint: "For example: Your customer database is more critical than your office printer. Your payment system is more critical than your marketing website.",
+            tiers: ["We haven't ranked our assets by importance or criticality", "Some people informally know what's most important, but it's not documented or agreed upon", "All assets are formally classified and ranked by criticality, with clear documentation", "Asset classification is continuously updated based on changing business conditions and automatically drives security resource allocation"]
+          },
+          { id: "ID.AM-07",
+            text: "Do you keep track of what important data you have, where it's stored, and how it's classified (e.g., public, internal, confidential)?",
+            hint: "For example: Do you know where all your customer personal data is stored? What data is considered 'confidential'? Who can access it?",
+            tiers: ["We don't track our data in any organized way — we're not sure where all our important data lives", "We know where some important data is, but we don't have a complete data inventory or classification system", "We have a complete data inventory with classifications, storage locations, and retention rules documented", "Data inventory is automated — new data stores are automatically discovered, classified, and tagged with appropriate handling rules"]
+          },
+          { id: "ID.AM-08",
+            text: "Do you manage your technology from start to finish — from when you buy it to when you retire it?",
+            hint: "For example: When a laptop is too old, do you wipe its data before disposing of it? When software reaches end-of-life, do you have a plan to replace it?",
+            tiers: ["We don't have a formal process for managing technology through its lifecycle", "We handle some lifecycle events (like new deployments), but retirement and disposal are inconsistent", "We have a formal lifecycle management process covering procurement, deployment, maintenance, and secure disposal", "Lifecycle management is automated with proactive alerts for aging assets and seamless secure decommissioning"]
+          }
+        ]
+      },
+      { id: "ID.RA", name: "Risk Assessment", desc: "Do you actively look for things that could go wrong and understand how bad it could be? These questions check whether you find and evaluate security risks before they become real problems.",
+        subs: [
+          { id: "ID.RA-01",
+            text: "Do you regularly scan for and track security weaknesses in your systems?",
+            hint: "For example: Do you run vulnerability scans on your servers and applications? Do you track the results and fix what you find?",
+            tiers: ["We don't actively look for security weaknesses in our systems", "We scan occasionally or only scan some systems, and tracking is informal", "We regularly scan all systems for vulnerabilities, document findings, and track fixes", "Continuous automated scanning finds vulnerabilities in real time, prioritizes them by actual risk, and integrates with our fix workflow"]
+          },
+          { id: "ID.RA-02",
+            text: "Do you receive and use threat information from outside sources to stay aware of current cyber threats?",
+            hint: "For example: Do you subscribe to threat feeds, industry alerts (like US-CERT, sector ISACs), or vendor security advisories?",
+            tiers: ["We don't receive any external threat information", "We occasionally see threat alerts but don't have a formal process for receiving or acting on them", "We subscribe to relevant threat intelligence sources and regularly review them to inform our security", "We consume multiple intelligence feeds that are automatically correlated with our environment to identify relevant threats in real time"]
+          },
+          { id: "ID.RA-03",
+            text: "Have you identified what threats your organization faces — both from outside (hackers, natural disasters) and inside (disgruntled employees, accidents)?",
+            hint: "For example: Have you documented threats like ransomware, phishing, insider theft, power outages, or natural disasters that could affect you?",
+            tiers: ["We haven't formally identified the threats we face", "We're generally aware of some threats, but haven't documented them systematically", "We have a documented threat list covering both internal and external threats, which is regularly reviewed", "Our threat identification is continuous, using automated intelligence and predictive analysis to anticipate new threats"]
+          },
+          { id: "ID.RA-04",
+            text: "When you identify a threat and a weakness, do you assess how likely it is to happen and how bad it would be?",
+            hint: "For example: A ransomware attack on your billing system — how likely is it (based on your defenses) and how bad would it be (financial loss, downtime, reputation)?",
+            tiers: ["We don't assess the likelihood or impact of specific threats", "We informally consider likelihood and impact for some risks, but it's not structured", "We formally assess both likelihood and impact for all identified risks using a consistent method", "Risk assessments are continuously updated with real-time data, historical trends, and predictive modeling"]
+          },
+          { id: "ID.RA-05",
+            text: "Do you use your risk assessments to decide which security issues to fix first?",
+            hint: "For example: If you have 50 vulnerabilities, do you fix the ones that are most likely to be exploited and would cause the most damage first?",
+            tiers: ["We fix things randomly or based on whoever complains the loudest", "We sometimes use risk to prioritize, but it's not consistent", "We have a formal risk-based prioritization process that determines what gets fixed first", "Prioritization is automated, combining threat data, asset criticality, and business impact to dynamically rank what matters most"]
+          },
+          { id: "ID.RA-06",
+            text: "When you decide how to respond to a risk, do you track your progress on implementing the fix?",
+            hint: "For example: If you decided to implement multi-factor authentication to reduce login risks, do you track whether it's actually been deployed everywhere?",
+            tiers: ["We make decisions about risks but don't track whether the fixes get implemented", "We track some risk responses, but it's informal and things fall through the cracks", "All risk responses are formally tracked with owners, deadlines, and regular status updates", "Risk response tracking is automated with dashboards, automatic escalation for overdue items, and effectiveness measurements"]
+          },
+          { id: "ID.RA-07",
+            text: "When someone wants to make a change to a system or request an exception to a security rule, is the security risk assessed and tracked?",
+            hint: "For example: If a team wants to skip encryption for a demo system, is that decision risk-assessed, documented, and tracked until it's resolved?",
+            tiers: ["Changes and exceptions happen without security review", "Important changes sometimes get reviewed, but there's no formal process for tracking exceptions", "All changes and security exceptions go through a formal risk assessment and are tracked in a register", "Change and exception tracking is automated, with risk scores recalculated when conditions change and automatic expiration of exceptions"]
+          },
+          { id: "ID.RA-08",
+            text: "If someone outside your company discovers a security flaw in your product or systems, is there a way for them to report it to you?",
+            hint: "For example: Do you have a 'security@yourcompany.com' address? A responsible disclosure page on your website? A bug bounty program?",
+            tiers: ["There's no way for outsiders to report security vulnerabilities to us", "Someone might figure out how to reach us, but there's no official process", "We have a published vulnerability disclosure process with clear instructions and defined response timelines", "We run a mature disclosure program (possibly including bug bounties), with SLAs for response and public recognition for reporters"]
+          },
+          { id: "ID.RA-09",
+            text: "Before you buy and use new hardware or software, do you verify it's genuine and hasn't been tampered with?",
+            hint: "For example: Do you verify that software downloads come from the real vendor? Check hardware for tampering? Verify digital signatures?",
+            tiers: ["We don't verify the authenticity of hardware or software before using it", "We sometimes check, but it's not a formal requirement or consistent practice", "We have a formal process to verify authenticity and integrity of all hardware and software before deployment", "Verification is automated with cryptographic checks, trusted supply chain validation, and continuous integrity monitoring"]
+          },
+          { id: "ID.RA-10",
+            text: "Before engaging a critical vendor, do you assess their security practices?",
+            hint: "For example: Before choosing a cloud provider for customer data, do you review their security certifications, audit reports, and incident history?",
+            tiers: ["We don't assess vendor security before engaging them", "We do basic checks for some vendors, but it's inconsistent", "All critical vendors undergo a formal security assessment before we commit to working with them", "Vendor assessments include automated security scoring, continuous monitoring, and periodic reassessments with clear pass/fail criteria"]
+          }
+        ]
+      },
+      { id: "ID.IM", name: "Improvement", desc: "Does your organization actively look for ways to get better at security? These questions check whether you learn from experience and actually improve over time.",
+        subs: [
+          { id: "ID.IM-01",
+            text: "After security audits and assessments, do you actually identify and act on the things that need to improve?",
+            hint: "For example: After an internal audit finds gaps, do you create action items with deadlines and owners, or does the report just sit on a shelf?",
+            tiers: ["We don't conduct security evaluations, or their results aren't acted upon", "We sometimes identify improvements but follow-through is inconsistent", "Evaluations consistently produce actionable improvements that are tracked to completion", "Improvements from evaluations are automatically fed into our planning process and their impact is measured"]
+          },
+          { id: "ID.IM-02",
+            text: "Do you run security tests and exercises (like penetration tests or simulated attacks) and use the results to improve?",
+            hint: "For example: Do you hire ethical hackers to test your defenses? Run phishing simulations? Practice responding to fake incidents?",
+            tiers: ["We don't do any security testing or exercises", "We do occasional testing, but results aren't systematically used to make improvements", "We regularly conduct security tests and exercises, and their findings drive concrete improvements", "Testing is continuous, includes coordination with key vendors, and improvements are tracked with measurable impact"]
+          },
+          { id: "ID.IM-03",
+            text: "Do you learn from your day-to-day operations and use those lessons to improve security?",
+            hint: "For example: If your team notices that a certain type of alert is always a false alarm, do you tune the system? If a process is causing people to work around security, do you fix the process?",
+            tiers: ["We don't systematically learn from our daily operations to improve security", "Some teams informally identify improvements, but there's no structured process", "We have a formal process for capturing operational lessons learned and turning them into security improvements", "Operational data is continuously analyzed to identify improvement opportunities, and changes are automatically proposed and tracked"]
+          },
+          { id: "ID.IM-04",
+            text: "Do you have a written plan for how to respond to security incidents, and is it kept up to date?",
+            hint: "For example: If you get hacked tomorrow, is there a documented plan that says who to call, what to do first, how to communicate, and how to recover?",
+            tiers: ["We don't have a written incident response plan", "We have a basic plan, but it hasn't been tested or updated recently", "We have a comprehensive, tested incident response plan that is regularly updated and communicated to all relevant staff", "Our plan is continuously improved through regular exercises, integrated with automated tools, and adapted based on the latest threat intelligence"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "PR", name: "Protect", color: "#10b981",
+    desc: "What safeguards do you have in place to prevent security problems? This section looks at whether you control who can access what, whether people are trained, and whether your systems and data are properly protected.",
+    categories: [
+      { id: "PR.AA", name: "Access Control & Identity", desc: "Who can access your systems and data, and how do you control it? These questions check whether only the right people can access the right things.",
+        subs: [
+          { id: "PR.AA-01",
+            text: "Do you manage user accounts, passwords, and access credentials in an organized way?",
+            hint: "For example: Do you have a central system for creating/disabling accounts? Are shared passwords eliminated? Do service accounts have assigned owners?",
+            tiers: ["User accounts and passwords are managed informally — people set things up as needed", "We manage accounts for major systems, but there's no central process and some accounts are untracked", "All user accounts and credentials are centrally managed with clear processes for creation, modification, and removal", "Identity management is fully automated with self-service, automatic provisioning/deprovisioning, and continuous credential health monitoring"]
+          },
+          { id: "PR.AA-02",
+            text: "Before giving someone access, do you verify they are who they say they are?",
+            hint: "For example: Does a new employee need to show ID before getting their account? For high-security access, do you require additional verification?",
+            tiers: ["We don't verify people's identity in a structured way before granting access", "We verify identity for some situations (like new hires) but not consistently for all access types", "Identity verification is required before granting any access, with stronger verification for sensitive systems", "Identity verification is risk-based and adaptive — stronger checks are automatically triggered for higher-risk access requests"]
+          },
+          { id: "PR.AA-03",
+            text: "Are users required to prove their identity when logging in (e.g., passwords, multi-factor authentication)?",
+            hint: "For example: Do you require strong passwords? Is multi-factor authentication (MFA) — like a code sent to your phone — required for sensitive systems?",
+            tiers: ["Basic passwords only, with no additional requirements for any systems", "We use some form of stronger authentication on a few systems, but it's not widespread", "Multi-factor authentication is required for all sensitive systems, and we have clear authentication policies", "Risk-adaptive authentication is in place — the system automatically requires stronger verification for unusual login patterns or high-risk actions"]
+          },
+          { id: "PR.AA-04",
+            text: "When one system tells another that a user is authenticated (e.g., single sign-on), is that process secured?",
+            hint: "For example: If you use Google or Microsoft to log into multiple apps, is that connection encrypted and verified? Can someone forge a login token?",
+            tiers: ["We don't secure or think about how authentication is passed between systems", "Authentication between some systems is secured, but it's not consistent", "All authentication tokens and sessions are encrypted, verified, and expire appropriately across all systems", "We use modern federation standards with continuous verification, encrypted tokens, and automatic revocation of compromised sessions"]
+          },
+          { id: "PR.AA-05",
+            text: "Do you control who can access what based on their job role — giving people only the access they actually need (principle of least privilege)?",
+            hint: "For example: Does an HR employee have access to financial systems they don't need? Can a junior employee approve their own purchase orders? Do you review access regularly?",
+            tiers: ["People generally get broad access and it's rarely reviewed or restricted", "Some access controls exist, but people often have more access than they need, and reviews are rare", "Access is granted based on job roles with least privilege enforced, and access reviews happen regularly", "Access is dynamically adjusted based on job changes, and automated tools continuously flag excessive permissions for removal"]
+          },
+          { id: "PR.AA-06",
+            text: "Do you control and monitor physical access to sensitive areas — like server rooms, network closets, and offices?",
+            hint: "For example: Are server rooms locked with badge access? Are visitor logs maintained? Are camera systems in place for sensitive areas?",
+            tiers: ["Physical access to sensitive areas is not controlled — doors are often unlocked or anyone can walk in", "Some areas have basic locks or badges, but it's not comprehensive and monitoring is minimal", "All sensitive areas have controlled access with badge systems, visitor logs, and monitoring in place", "Physical access is integrated with our identity system, with real-time monitoring, automatic alerts for anomalies, and regular access reviews"]
+          }
+        ]
+      },
+      { id: "PR.AT", name: "Security Awareness & Training", desc: "Do your people know how to work safely? These questions check whether employees are trained to recognize and avoid security threats.",
+        subs: [
+          { id: "PR.AT-01",
+            text: "Do all employees receive regular security awareness training — like how to spot phishing emails, create strong passwords, and handle sensitive data?",
+            hint: "For example: Does everyone complete annual security training? Are there simulated phishing tests? Do people know not to plug in unknown USB drives?",
+            tiers: ["We don't provide security awareness training to employees", "Some training happens (maybe during onboarding), but it's not regular or comprehensive", "All employees receive regular security training, with completion tracking and periodic refreshers", "Training is continuous, personalized based on role and behavior, with real-time coaching (e.g., warning when someone clicks a phishing link)"]
+          },
+          { id: "PR.AT-02",
+            text: "Do people in technical or specialized roles (like IT administrators, developers, or finance staff) get additional security training specific to their job?",
+            hint: "For example: Do developers learn about secure coding? Do system admins learn about hardening? Does finance learn about wire fraud?",
+            tiers: ["Specialized staff don't get additional security training beyond what everyone else gets", "Some specialized training happens informally, but it's not structured or consistent", "All staff in specialized roles receive role-specific security training on a regular schedule", "Specialized training is continuously updated based on emerging threats, includes hands-on exercises, and effectiveness is measured"]
+          }
+        ]
+      },
+      { id: "PR.DS", name: "Data Protection", desc: "Is your data properly protected wherever it is — stored on a server, being sent over the internet, or being used by an application? These questions check whether your important information is secured.",
+        subs: [
+          { id: "PR.DS-01",
+            text: "Is data that's stored on your systems (databases, file servers, laptops, backups) protected with measures like encryption?",
+            hint: "For example: Are laptops encrypted so data is safe if one is stolen? Are databases encrypted? Are backup tapes stored securely?",
+            tiers: ["Stored data is generally not encrypted or protected beyond basic access controls", "Some sensitive data is encrypted, but it's not consistent across all systems", "All sensitive data at rest is encrypted, with encryption keys properly managed", "Comprehensive data-at-rest protection with automated key management, hardware-backed encryption, and continuous compliance verification"]
+          },
+          { id: "PR.DS-02",
+            text: "Is data that's being sent over networks (emails, file transfers, API calls) protected with encryption?",
+            hint: "For example: Does your website use HTTPS? Are emails to clients encrypted? Are file transfers between offices encrypted?",
+            tiers: ["Data is often sent unencrypted — many connections don't use encryption", "Some data transfers use encryption (like HTTPS for the website), but not everything", "All sensitive data in transit is encrypted using modern protocols (TLS 1.2+), with clear policies", "All data in transit is encrypted by default, encryption standards are automatically enforced, and unencrypted channels are blocked"]
+          },
+          { id: "PR.DS-10",
+            text: "Is data protected while it's actively being used or processed by applications?",
+            hint: "For example: When customer data is loaded into an application for processing, is it protected from being accessed by unauthorized processes or users?",
+            tiers: ["We don't have specific protections for data while it's being processed", "Some applications protect data during processing, but it's not systematic", "We have measures to protect data during processing, including access controls and memory protections", "Advanced protections like confidential computing, data masking, and real-time monitoring protect data during all processing"]
+          },
+          { id: "PR.DS-11",
+            text: "Do you regularly back up your important data, store backups safely, and test that you can actually restore from them?",
+            hint: "For example: Are backups made daily? Stored in a separate location? Encrypted? Have you actually tried restoring from a backup in the last 6 months?",
+            tiers: ["We don't have reliable backups, or we have them but have never tested restoring from them", "We have some backups, but they're not comprehensive, not always stored safely, and rarely tested", "All critical data is backed up regularly, backups are encrypted and stored offsite, and we test restores periodically", "Backups are automated and continuous, stored in multiple locations, tested automatically on a regular schedule, and restore times are measured"]
+          }
+        ]
+      },
+      { id: "PR.PS", name: "System & Platform Security", desc: "Are your computers, servers, and software configured securely and kept up to date? These questions check whether your technology platforms are hardened against attacks.",
+        subs: [
+          { id: "PR.PS-01",
+            text: "Do you have standard, secure settings for your systems, and do you make sure those settings stay in place?",
+            hint: "For example: Are servers configured using a security baseline (like CIS benchmarks)? Are default passwords changed? Are unnecessary services disabled?",
+            tiers: ["Systems are set up however the person installing them sees fit — no standard configuration", "We have some configuration standards, but they're not consistently applied or checked", "We have documented configuration standards applied to all systems, with regular compliance checks", "Configuration management is automated — systems are continuously monitored for drift from standards and automatically corrected"]
+          },
+          { id: "PR.PS-02",
+            text: "Do you keep your software up to date with security patches and replace or remove software that's no longer supported?",
+            hint: "For example: Are Windows updates applied regularly? Do you know if any software has reached end-of-life and is no longer getting security patches?",
+            tiers: ["Software updates happen randomly, if at all — we're probably running outdated software", "We update some systems, but it's not consistent and we probably have unsupported software in use", "We have a formal patching process with timelines, and we track and plan for end-of-life software", "Patching is automated with risk-based prioritization, zero-day response procedures, and proactive end-of-life planning"]
+          },
+          { id: "PR.PS-03",
+            text: "Do you keep your hardware in good condition and replace it before it becomes a security risk?",
+            hint: "For example: Do you replace old firewalls that no longer receive updates? Servers that are past their warranty? Devices with known hardware vulnerabilities?",
+            tiers: ["Hardware is used until it physically breaks — no proactive replacement", "We replace some critical hardware, but many old devices remain in service without evaluation", "All hardware is tracked, maintained on a schedule, and replaced when it reaches end-of-life or poses a security risk", "Hardware lifecycle is proactively managed with automated alerts, predictive replacement scheduling, and secure decommissioning"]
+          },
+          { id: "PR.PS-04",
+            text: "Do your systems generate logs (records of what's happening), and can your security team actually review them?",
+            hint: "For example: Do your servers log login attempts? Do your firewalls log blocked connections? Can anyone actually look at these logs, or are they just being stored?",
+            tiers: ["Most systems don't generate security logs, or logs aren't accessible to anyone", "Some systems generate logs, but they're not centralized or regularly reviewed", "All critical systems generate logs that are sent to a central location and are available for monitoring and investigation", "Comprehensive logging is automated, centralized, and actively monitored with alerts for suspicious patterns"]
+          },
+          { id: "PR.PS-05",
+            text: "Do you prevent employees from installing unauthorized software on company devices?",
+            hint: "For example: Can employees install any software they want? Can someone install a cracked game or unknown program on their work laptop?",
+            tiers: ["Anyone can install whatever software they want on company devices", "There are informal guidelines, but nothing technically prevents unauthorized installations", "We have technical controls (like application whitelisting or admin restrictions) that prevent unauthorized software", "Software installation is tightly controlled with automated approval workflows, real-time monitoring, and immediate blocking of unapproved applications"]
+          },
+          { id: "PR.PS-06",
+            text: "If your organization develops software, are security practices built into the development process?",
+            hint: "For example: Do developers check code for security flaws before release? Is there security testing before deployment? Are security requirements included from the start?",
+            tiers: ["We don't consider security during software development, or we don't develop software (mark N/A if not applicable)", "Some developers think about security, but there's no formal secure development process", "Security is built into our development process — including secure coding standards, code reviews, and security testing before release", "Security is fully automated in our development pipeline with continuous scanning, automated testing, and real-time feedback to developers"]
+          }
+        ]
+      },
+      { id: "PR.IR", name: "Infrastructure Resilience", desc: "Can your technology keep running when things go wrong? These questions check whether your networks and systems are built to withstand attacks, outages, and disasters.",
+        subs: [
+          { id: "PR.IR-01",
+            text: "Are your networks protected from unauthorized access — with firewalls, network segmentation, and access controls?",
+            hint: "For example: Is your internal network separated from the internet by firewalls? Are sensitive systems isolated on separate network segments? Is Wi-Fi secured?",
+            tiers: ["Our network is essentially flat with minimal protections — anyone inside can reach everything", "We have basic firewalls and some access controls, but the network isn't well-segmented", "Our network is properly segmented with firewalls, access controls, and monitoring between segments", "Network security is dynamic with micro-segmentation, zero-trust architecture, and automated response to unauthorized access attempts"]
+          },
+          { id: "PR.IR-02",
+            text: "Are your technology assets protected from environmental threats like fire, flooding, power outages, and extreme temperatures?",
+            hint: "For example: Does your server room have fire suppression? UPS (battery backup)? Climate control? Is it above the flood line?",
+            tiers: ["We haven't considered environmental protections for our technology", "Basic protections exist for some areas (like a UPS), but it's not comprehensive", "All critical technology areas have appropriate environmental protections (fire suppression, UPS, climate control, flood protection)", "Environmental protections are monitored in real time with automated alerts, redundant systems, and regular testing"]
+          },
+          { id: "PR.IR-03",
+            text: "Are your systems built to keep running (or recover quickly) when something goes wrong — like a hardware failure or an attack?",
+            hint: "For example: Do you have redundant servers? Failover systems? If one data center goes down, does another take over?",
+            tiers: ["Most systems are single points of failure — if something breaks, it's down until we fix it", "Some critical systems have redundancy, but most don't", "Critical systems have redundancy and failover capabilities, with documented recovery procedures", "All critical systems have automated failover, self-healing capabilities, and are regularly tested through chaos engineering"]
+          },
+          { id: "PR.IR-04",
+            text: "Do you make sure your systems have enough capacity (storage, processing power, bandwidth) to stay available during peak times or attacks?",
+            hint: "For example: Can your website handle a traffic spike? Could a DDoS attack overwhelm your bandwidth? Do you monitor for capacity issues?",
+            tiers: ["We don't monitor or plan for capacity — we find out when things break", "We plan capacity for some systems, but it's not systematic", "We regularly monitor and plan capacity for all critical systems, including headroom for unexpected spikes", "Capacity is automatically scaled based on demand, with DDoS protection and predictive capacity planning"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "DE", name: "Detect", color: "#f59e0b",
+    desc: "Can you spot when something bad is happening? This section checks whether you have monitoring in place to detect security incidents, and whether you can analyze and understand what's going on.",
+    categories: [
+      { id: "DE.CM", name: "Monitoring", desc: "Are you watching for signs of trouble? These questions check whether you're actively monitoring your systems, networks, and people for security threats.",
+        subs: [
+          { id: "DE.CM-01",
+            text: "Do you monitor your network traffic for signs of malicious activity — like unusual data transfers, suspicious connections, or intrusion attempts?",
+            hint: "For example: Do you have intrusion detection systems (IDS)? Network monitoring tools? Alerts for unusual outbound data transfers?",
+            tiers: ["We don't monitor our network for security threats", "We have some basic monitoring, but it doesn't cover everything and alerts aren't consistently reviewed", "We have comprehensive network monitoring with defined alerts and a team that reviews and responds to them", "Our network monitoring uses AI-powered analysis, automatically correlates events, and can detect sophisticated attack patterns in real time"]
+          },
+          { id: "DE.CM-02",
+            text: "Do you monitor your physical spaces for security threats — like unauthorized access to offices, server rooms, or data centers?",
+            hint: "For example: Are there security cameras? Door access logs? Alarms? Does someone actually review these?",
+            tiers: ["Physical spaces are not monitored for security threats", "Some areas have cameras or badge readers, but monitoring is minimal or not reviewed", "Sensitive areas are monitored with cameras, access logs, and alarms, and records are reviewed regularly", "Physical monitoring is integrated with our cyber security — for example, a badge into the server room triggers a check that the person also logged in digitally"]
+          },
+          { id: "DE.CM-03",
+            text: "Do you monitor employee and user activity on your systems for signs of suspicious behavior?",
+            hint: "For example: Do you get alerts when someone accesses data they normally don't? When an account is used at unusual hours? When someone downloads massive amounts of data?",
+            tiers: ["We don't monitor user activity for security purposes", "We have basic logging but don't actively monitor for suspicious user behavior", "We monitor user activity with defined baselines, and alerts fire for unusual behavior patterns", "User behavior analytics automatically detect anomalies, flag insider threats, and adapt to evolving patterns over time"]
+          },
+          { id: "DE.CM-06",
+            text: "Do you monitor the activities of your external service providers and vendors for security concerns?",
+            hint: "For example: If a vendor connects to your systems, do you monitor what they access? If your cloud provider has an outage, do you get alerted?",
+            tiers: ["We don't monitor our vendors' or service providers' activities", "We rely on vendors to tell us if something goes wrong, but we don't actively monitor them", "We monitor key vendor activities and have alerts for vendor-side security events or anomalies", "Vendor monitoring is automated and integrated with our security operations, with real-time visibility into vendor activities on our systems"]
+          },
+          { id: "DE.CM-09",
+            text: "Do you monitor your computers, servers, and applications for signs of malware, tampering, or other security issues?",
+            hint: "For example: Do you run antivirus/endpoint detection software? Do you monitor for unauthorized changes to critical files? Check for cryptominers or other unwanted software?",
+            tiers: ["We don't have security monitoring on our computers and servers", "We have basic antivirus on some devices, but coverage is incomplete", "All devices have endpoint security tools, and alerts are monitored and investigated by our team", "Advanced endpoint detection and response (EDR) runs on all devices with automated threat hunting, isolation of compromised machines, and real-time response"]
+          }
+        ]
+      },
+      { id: "DE.AE", name: "Security Event Analysis", desc: "When you detect something suspicious, can you figure out what's actually happening? These questions check whether you can investigate and understand security events.",
+        subs: [
+          { id: "DE.AE-02",
+            text: "When a suspicious event is detected, do you investigate it to understand what actually happened?",
+            hint: "For example: If an alert fires, does someone look into it? Do they check what triggered it, what was affected, and whether it's a real attack or a false alarm?",
+            tiers: ["We don't investigate suspicious events — alerts are ignored or unnoticed", "We investigate major alerts, but many go unreviewed and investigation is ad hoc", "All alerts are triaged and significant ones are investigated following a defined process", "Investigations are enhanced with automated enrichment, correlation with historical data, and AI-assisted analysis to speed up understanding"]
+          },
+          { id: "DE.AE-03",
+            text: "Do you combine information from multiple sources to get a fuller picture of what's happening?",
+            hint: "For example: Do you connect data from your firewall, endpoint security, email security, and cloud logs to see the full story of an attack?",
+            tiers: ["We look at each security tool's alerts separately — they're not connected", "We sometimes manually check multiple sources during an investigation, but it's not systematic", "We have a central system (like a SIEM) that collects and correlates data from multiple security tools", "Multiple data sources are automatically correlated in real time, with machine learning identifying patterns humans would miss"]
+          },
+          { id: "DE.AE-04",
+            text: "When something suspicious happens, can you quickly determine how bad it is and how much of your organization is affected?",
+            hint: "For example: If malware is detected on one computer, can you quickly tell if it has spread to other machines? If data was accessed, can you tell how much?",
+            tiers: ["We can't easily determine the scope or impact of security events", "We can sometimes figure out impact, but it takes a long time and isn't always accurate", "We have processes and tools to quickly assess the impact and scope of security events", "Impact assessment is near-instant with automated tools that map the blast radius of an event across our entire environment"]
+          },
+          { id: "DE.AE-06",
+            text: "When something bad is detected, does the right information reach the right people and tools quickly?",
+            hint: "For example: Do security alerts go to the security team? Does leadership get notified of serious incidents? Do relevant tools automatically get updated threat data?",
+            tiers: ["Information about security events doesn't reliably reach the right people", "Important events usually reach the security team, but other relevant staff may not be informed", "We have clear notification procedures that ensure the right people and tools get the right information promptly", "Notifications are automated and role-based, with escalation paths, and integrate directly with response tools and playbooks"]
+          },
+          { id: "DE.AE-07",
+            text: "Do you use external threat intelligence (information about current threats and attack methods) to help analyze your security events?",
+            hint: "For example: If you see a suspicious IP address in your logs, do you check it against known threat databases? Do you know what attack techniques are trending in your industry?",
+            tiers: ["We don't use any external threat intelligence in our analysis", "We occasionally look up indicators online, but it's not integrated into our analysis process", "Threat intelligence feeds are integrated into our analysis tools and actively used during investigations", "Multiple threat intelligence sources are automatically correlated with our events, providing instant context and proactive threat hunting"]
+          },
+          { id: "DE.AE-08",
+            text: "Do you have clear criteria for when a security event should be officially declared an 'incident' — triggering your formal response process?",
+            hint: "For example: Not every alert is an incident. Do you have clear thresholds — like 'confirmed malware on a production system' = incident, while 'blocked phishing email' = event?",
+            tiers: ["We don't have clear criteria — everything is treated the same, or nothing is treated as serious", "There are some informal ideas about what constitutes an incident, but no defined criteria", "We have documented incident declaration criteria that are understood by the team and consistently applied", "Incident criteria are continuously refined based on experience, and automated systems can recommend or automatically declare incidents based on defined thresholds"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "RS", name: "Respond", color: "#ef4444",
+    desc: "When a security incident happens, can you respond effectively? This section checks whether you can manage, investigate, contain, and communicate about incidents.",
+    categories: [
+      { id: "RS.MA", name: "Incident Management", desc: "When a security incident is declared, can you manage the response in an organized way? These questions check whether you have a process for handling incidents from start to finish.",
+        subs: [
+          { id: "RS.MA-01",
+            text: "When a security incident occurs, do you follow a documented plan — including coordinating with relevant external parties?",
+            hint: "For example: Do you have a step-by-step playbook? Do you know when to call your insurance provider, law firm, or forensic investigators?",
+            tiers: ["We don't have a plan — we figure it out in the moment", "We have a basic plan, but it's not detailed and we haven't practiced it", "We follow a comprehensive incident response plan that includes coordination with external parties (lawyers, forensics, insurers)", "Our response plans include automated playbooks, pre-established contracts with external parties, and are regularly tested through realistic exercises"]
+          },
+          { id: "RS.MA-02",
+            text: "When incident reports come in, do you verify they're real and assess their urgency?",
+            hint: "For example: If someone reports a potential breach, do you quickly check if it's actually a security incident or a false alarm? Do you assess how urgent it is?",
+            tiers: ["We don't have a process for evaluating incident reports", "Reports are looked at eventually, but there's no consistent triage process", "All incident reports are promptly triaged, validated, and prioritized using documented criteria", "Triage is partially automated with initial analysis and prioritization happening within minutes, with human review for confirmation"]
+          },
+          { id: "RS.MA-03",
+            text: "Do you categorize and prioritize incidents so the most serious ones get handled first?",
+            hint: "For example: A ransomware attack gets higher priority than a single phishing email. A breach of customer data is more urgent than a compromised marketing system.",
+            tiers: ["All incidents are treated the same — there's no prioritization", "We informally decide what's more important, but there's no consistent categorization", "We have a defined classification system that categorizes incidents by type and priority, driving response urgency", "Classification is automated, dynamically adjusts priority based on evolving intelligence, and drives appropriate resource allocation"]
+          },
+          { id: "RS.MA-04",
+            text: "Do you have a clear process for escalating serious incidents to higher management or external authorities?",
+            hint: "For example: If a junior analyst finds a major breach, do they know who to escalate to? At what point does the CEO need to know? When do you contact law enforcement?",
+            tiers: ["There's no escalation process — people handle things at their level or ignore them", "Escalation happens informally based on individual judgment", "We have clear escalation criteria and paths — everyone knows when and how to escalate incidents", "Escalation is automated for certain thresholds, with predefined communication templates and on-call schedules that ensure rapid response"]
+          },
+          { id: "RS.MA-05",
+            text: "Do you have clear criteria for when to start recovery efforts after an incident?",
+            hint: "For example: At what point do you decide it's safe to start restoring systems? Who makes that call? What conditions need to be met first?",
+            tiers: ["We don't have defined criteria — someone just decides when to start restoring things", "There are informal guidelines, but the decision is mostly ad hoc", "We have documented criteria for initiating recovery, including who approves and what conditions must be met", "Recovery initiation is data-driven with automated checks confirming the threat is contained before proceeding, with clear decision authorities"]
+          }
+        ]
+      },
+      { id: "RS.AN", name: "Investigation & Analysis", desc: "Can you figure out what happened during an incident? These questions check whether you can properly investigate security incidents and preserve evidence.",
+        subs: [
+          { id: "RS.AN-03",
+            text: "During a security incident, do you investigate to determine exactly what happened and why?",
+            hint: "For example: Can you determine how the attacker got in, what they accessed, how long they were there, and what the root cause was?",
+            tiers: ["We don't conduct formal investigations — we just try to get things running again", "We do some investigation but it's often incomplete and doesn't find the root cause", "We conduct thorough investigations that determine the timeline, scope, and root cause of incidents", "Investigations leverage advanced forensics, automated timeline reconstruction, and root cause analysis tools, with findings fed back into our defenses"]
+          },
+          { id: "RS.AN-06",
+            text: "During an investigation, do you keep proper records of every action taken, and protect those records from tampering?",
+            hint: "For example: Is every investigative step documented? Are logs preserved? Could you use this evidence in court if needed?",
+            tiers: ["Investigation actions aren't documented — people just do what they think is right", "Some notes are taken, but there's no formal documentation standard or evidence protection", "All investigation actions are formally documented with timestamps, and evidence integrity is preserved (chain of custody)", "Digital forensic tools automatically capture and preserve all investigation actions with cryptographic integrity verification, court-ready documentation"]
+          },
+          { id: "RS.AN-07",
+            text: "Do you properly collect and preserve evidence (logs, files, system images) during security incidents?",
+            hint: "For example: Do you take forensic copies of affected systems? Preserve relevant logs before they're overwritten? Store evidence securely?",
+            tiers: ["We don't collect or preserve evidence during incidents", "We try to save some evidence, but the process is inconsistent and evidence may not be properly preserved", "We have formal evidence collection procedures that maintain data integrity and chain of custody", "Evidence collection is automated where possible, with forensic imaging, log preservation, and secure evidence storage happening immediately upon incident detection"]
+          },
+          { id: "RS.AN-08",
+            text: "During an incident, can you estimate how big the problem is — how many systems, users, or data records are affected?",
+            hint: "For example: If customer data was breached, can you determine how many customers were affected? Which systems were compromised? How much data was taken?",
+            tiers: ["We can't easily determine the size or scope of an incident", "We can make rough estimates, but it takes a long time and may not be accurate", "We have tools and processes to quickly estimate incident magnitude with reasonable accuracy", "Automated tools rapidly map incident scope in near-real time, with confidence levels and continuous refinement as more information becomes available"]
+          }
+        ]
+      },
+      { id: "RS.CO", name: "Communication & Reporting", desc: "When an incident happens, do you communicate properly — both internally to your team and externally to customers, partners, and regulators?",
+        subs: [
+          { id: "RS.CO-02",
+            text: "Do you have a process for notifying the right people inside and outside your organization when an incident occurs?",
+            hint: "For example: Do employees know about the incident? Are customers notified if their data is affected? Do you notify regulators as required by law?",
+            tiers: ["We don't have a notification process — communication during incidents is chaotic", "Some stakeholders are notified, but it's inconsistent and not always timely", "We have a defined notification process that covers both internal stakeholders and external parties (customers, regulators, partners)", "Notification is partially automated with pre-approved templates, regulatory-specific workflows, and tracking to ensure all required parties are notified within required timeframes"]
+          },
+          { id: "RS.CO-03",
+            text: "Do you share relevant information about security incidents with the people who need to know — both inside and outside your organization?",
+            hint: "For example: Do you share indicators of compromise with industry peers? Brief your board? Provide technical details to affected partners?",
+            tiers: ["We don't share incident information systematically", "We share some information informally, but there's no structured approach", "We have clear guidelines on what to share, with whom, and when — both internally and with external partners", "Information sharing is automated where appropriate, with defined sharing protocols, privacy controls, and participation in industry sharing communities"]
+          }
+        ]
+      },
+      { id: "RS.MI", name: "Stopping the Damage", desc: "Can you stop an incident from getting worse and eliminate the threat? These questions check whether you can contain and fix the problem.",
+        subs: [
+          { id: "RS.MI-01",
+            text: "When an incident is detected, can you quickly contain it to prevent it from spreading?",
+            hint: "For example: Can you isolate a compromised computer from the network? Block a malicious IP address? Disable a compromised user account? How fast?",
+            tiers: ["We can't quickly contain incidents — it takes a long time to isolate affected systems", "We can contain some incidents, but the process is manual and slow", "We have documented containment procedures and can quickly isolate threats through predefined actions", "Containment is automated where possible — compromised systems are automatically isolated within minutes, with predefined playbooks for different incident types"]
+          },
+          { id: "RS.MI-02",
+            text: "After containing an incident, can you completely remove the threat from your environment?",
+            hint: "For example: Can you fully remove malware from all affected systems? Close the security hole the attacker used? Reset all compromised credentials?",
+            tiers: ["We're not confident we can fully remove threats — sometimes they come back", "We try to remove threats, but we're not always sure we got everything", "We have thorough eradication procedures that ensure threats are fully removed and the entry point is closed", "Eradication is comprehensive and verified — with automated scanning to confirm the threat is fully eliminated and monitoring to ensure it doesn't recur"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "RC", name: "Recover", color: "#06b6d4",
+    desc: "After a security incident, can you get back to normal? This section checks whether you can restore your systems, communicate effectively during recovery, and learn from what happened.",
+    categories: [
+      { id: "RC.RP", name: "Getting Back to Normal", desc: "Can you restore your systems and services after a security incident? These questions check whether you have a solid recovery process.",
+        subs: [
+          { id: "RC.RP-01",
+            text: "Do you have a documented recovery plan that kicks in after an incident, and do people follow it?",
+            hint: "For example: After a ransomware attack, does everyone know the steps: assess damage, prioritize systems, restore from backups, verify everything works?",
+            tiers: ["We don't have a recovery plan — we figure it out as we go", "We have a basic plan, but it hasn't been tested and people may not know about it", "We have a documented, tested recovery plan that is activated when needed and people know their roles", "Our recovery plan is regularly tested through exercises, automatically integrates with our incident response, and is continuously improved"]
+          },
+          { id: "RC.RP-02",
+            text: "Do you prioritize what to recover first — restoring the most critical systems and services before less important ones?",
+            hint: "For example: After an outage, do you restore the payment system before the marketing website? Do you know the right order to bring things back?",
+            tiers: ["We don't prioritize — things get restored in whatever order people get to them", "We informally know what's most important, but priorities aren't documented", "We have documented recovery priorities based on business criticality, and recovery actions are planned accordingly", "Recovery priorities are dynamically determined based on current business conditions and automated workflows ensure the right order is followed"]
+          },
+          { id: "RC.RP-03",
+            text: "Before restoring from backups, do you verify that the backups themselves are clean and haven't been compromised?",
+            hint: "For example: If you're restoring from backup after a ransomware attack, do you check that the backup isn't also infected? Do you verify data integrity?",
+            tiers: ["We don't check backups before restoring — we just hope they're good", "We sometimes check backups, but there's no formal verification process", "We have a formal process to verify backup integrity and check for compromise before using them for restoration", "Backup integrity is automatically verified at creation time and again before restoration, with malware scanning and cryptographic checksums"]
+          },
+          { id: "RC.RP-04",
+            text: "When recovering from an incident, do you consider security and business priorities in deciding what 'back to normal' looks like?",
+            hint: "For example: After an incident, should you go back to exactly how things were (which might still be vulnerable), or should you implement additional protections first?",
+            tiers: ["We just try to get everything running again as fast as possible without thinking about improvements", "We sometimes fix the specific issue that caused the incident, but don't think more broadly", "We deliberately consider both business needs and security improvements when establishing post-incident operations", "Post-incident operations always include security improvements, with formal acceptance criteria and continuous monitoring for similar threats"]
+          },
+          { id: "RC.RP-05",
+            text: "After restoring systems, do you verify everything is actually working correctly and securely before declaring recovery complete?",
+            hint: "For example: After restoring from backup, do you test that the system works? Run security scans? Verify data integrity? Or do you just turn it on and hope?",
+            tiers: ["We turn systems back on and assume they're fine", "We do basic testing, but don't thoroughly verify security or data integrity", "We have a formal verification process that confirms system functionality, data integrity, and security before declaring recovery complete", "Verification is automated with comprehensive testing, security scanning, and performance benchmarking before systems are returned to production"]
+          },
+          { id: "RC.RP-06",
+            text: "Do you formally close out an incident — documenting what happened, what was done, and what you learned?",
+            hint: "For example: Is there a post-incident report? A lessons-learned session? A formal declaration that 'the incident is resolved'?",
+            tiers: ["Incidents just sort of fade away — there's no formal closure or documentation", "We sometimes do informal reviews, but don't consistently document or learn from incidents", "Every incident has a formal closure process including documentation, lessons learned, and a post-incident review", "Incident closure includes comprehensive documentation, formal lessons learned that feed into our improvement program, and metrics tracking recovery effectiveness"]
+          }
+        ]
+      },
+      { id: "RC.CO", name: "Recovery Communication", desc: "During recovery, do you keep everyone informed about progress? These questions check whether you communicate well during and after the recovery process.",
+        subs: [
+          { id: "RC.CO-03",
+            text: "During recovery, do you keep internal teams and external stakeholders updated on progress?",
+            hint: "For example: Do employees know when systems will be back? Do customers know the status? Do partners know when your services will resume?",
+            tiers: ["Communication during recovery is minimal or non-existent — people are left guessing", "Some updates happen, but they're inconsistent and not everyone who needs to know is informed", "We have a structured communication plan for recovery, with regular updates to all relevant internal and external stakeholders", "Recovery communication is automated where possible, with real-time status pages, scheduled stakeholder updates, and proactive notification as milestones are reached"]
+          },
+          { id: "RC.CO-04",
+            text: "If the public needs to know about an incident and recovery, do you have a plan for how to communicate?",
+            hint: "For example: Do you have pre-approved messaging templates? A designated spokesperson? A process for website notices and press statements?",
+            tiers: ["We have no plan for public communication about incidents — it would be chaotic", "We would figure out public messaging on the fly, with no pre-approved templates or spokesperson", "We have pre-approved communication templates, a designated spokesperson, and a defined approval process for public updates", "Public communication is part of a comprehensive crisis communication plan with media training, pre-positioned statements, and real-time monitoring of public sentiment"]
+          }
+        ]
+      }
+    ]
+  }
+];
+
+const TIER_INFO = [
+  { tier: 1, name: "Starting Out", short: "We haven't really addressed this yet", color: "var(--tier1)" },
+  { tier: 2, name: "Developing", short: "We've started, but it's not consistent across the organization", color: "var(--tier2)" },
+  { tier: 3, name: "Established", short: "We have a solid, documented process that everyone follows", color: "var(--tier3)" },
+  { tier: 4, name: "Advanced", short: "We continuously improve and use automation and data to stay ahead", color: "var(--tier4)" }
+];
+
+// ====== INDUSTRY BENCHMARKS ======
+// Calibrated from: Wavestone 2025 Cyber Benchmark (170+ orgs), CYE 2025 Maturity Report,
+// RH-ISAC 2025 CISO Benchmark, KLAS/Censinet 2024 Healthcare Study, CIS NCSR 2024 (4,151 orgs),
+// CyberSierra 2026 Targets, NIST CSF Adoption Report 2025. Scores on the 1-4 tier scale.
+const BENCHMARK_DATE = "March 2026";
+const BENCHMARK_SOURCES = "Wavestone, CYE, RH-ISAC, KLAS/Censinet, CIS NCSR, CyberSierra (2024-2026)";
+const INDUSTRY_BENCHMARKS = {
+  "Financial Services":        { GV: 2.8, ID: 2.5, PR: 2.7, DE: 2.6, RS: 2.7, RC: 2.2 },
+  "Healthcare":                { GV: 2.1, ID: 1.9, PR: 2.2, DE: 2.0, RS: 2.3, RC: 1.7 },
+  "Technology":                { GV: 2.5, ID: 2.4, PR: 2.6, DE: 2.5, RS: 2.4, RC: 2.0 },
+  "IoT & Connected Devices":   { GV: 2.3, ID: 2.2, PR: 2.4, DE: 2.3, RS: 2.2, RC: 1.8 },
+  "Manufacturing":             { GV: 2.1, ID: 2.0, PR: 2.2, DE: 1.9, RS: 2.0, RC: 1.6 },
+  "Energy & Utilities":        { GV: 2.4, ID: 2.2, PR: 2.5, DE: 2.3, RS: 2.3, RC: 1.9 },
+  "Government":                { GV: 2.0, ID: 1.8, PR: 2.1, DE: 1.9, RS: 2.0, RC: 1.5 },
+  "Retail & E-commerce":       { GV: 2.0, ID: 1.9, PR: 2.1, DE: 2.0, RS: 2.1, RC: 1.6 },
+  "Education":                 { GV: 1.6, ID: 1.5, PR: 1.7, DE: 1.4, RS: 1.5, RC: 1.2 },
+  "Telecommunications":        { GV: 2.3, ID: 2.2, PR: 2.4, DE: 2.3, RS: 2.2, RC: 1.8 },
+  "Defense & Aerospace":       { GV: 2.7, ID: 2.5, PR: 2.8, DE: 2.6, RS: 2.6, RC: 2.1 },
+  "Transportation":            { GV: 1.9, ID: 1.8, PR: 2.0, DE: 1.8, RS: 1.9, RC: 1.5 },
+  "Other":                     { GV: 2.2, ID: 2.1, PR: 2.3, DE: 2.1, RS: 2.1, RC: 1.7 }
+};
+
+// Cross-industry average (all sectors combined)
+const CROSS_INDUSTRY_AVG = { GV: 2.2, ID: 2.1, PR: 2.3, DE: 2.1, RS: 2.1, RC: 1.7 };
+
+function getIndustryBenchmark() {
+  const ind = orgInfo.industry;
+  return INDUSTRY_BENCHMARKS[ind] || CROSS_INDUSTRY_AVG;
+}
+
+function getIndustryOverall(bench) {
+  const vals = Object.values(bench);
+  return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+// ====== FIREBASE CONFIG ======
+// TODO: Replace with your Firebase project config.
+// Steps: 1) Go to https://console.firebase.google.com
+//        2) Create a new project (or use existing)
+//        3) Add a Web app and copy the config below
+//        4) Enable Realtime Database (not Firestore) in the Firebase console
+//        5) Set database rules to: { "rules": { ".read": true, ".write": true } }
+//           (For production, add proper auth rules)
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let firebaseReady = false;
+let db = null;
+
+function initFirebase() {
+  try {
+    if (FIREBASE_CONFIG.apiKey === "YOUR_API_KEY") {
+      console.warn('Firebase not configured. Collaborative features disabled.');
+      return false;
+    }
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    firebaseReady = true;
+    return true;
+  } catch (e) {
+    console.error('Firebase init failed:', e);
+    return false;
+  }
+}
+
+// Initialize on load
+initFirebase();
+
+// ====== STATE ======
+let answers = {};
+let currentFnIdx = 0;
+let currentCatIdx = 0;
+let orgInfo = {};
+
+// ====== COLLABORATION STATE ======
+let sessionId = null;
+let sessionRef = null;
+let userId = null;
+let userName = '';
+let collaborators = {};
+let answerMeta = {};
+let isCollaborative = false;
+
+// Color palette for presence avatars
+const AVATAR_COLORS = ['#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#84cc16'];
+
+function generateSessionId() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function generateUserId() {
+  return 'u_' + Math.random().toString(36).substring(2, 10);
+}
+
+function encodeSubId(id) {
+  return id.replace(/\./g, '_');
+}
+
+function decodeSubId(key) {
+  return key.replace(/_/, '.');
+}
+
+function getAvatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function getInitials(name) {
+  return name.split(/\s+/).map(w => w[0]).join('').toUpperCase().substring(0, 2);
+}
+
+// ====== SESSION MANAGEMENT ======
+function startCollaborativeSession() {
+  if (!firebaseReady) {
+    alert('Firebase is not configured. Please add your Firebase config to the code first.\n\nSee the FIREBASE_CONFIG section in index.html.');
+    return;
+  }
+  const name = document.getElementById('orgName').value.trim();
+  if (!name) { document.getElementById('orgName').focus(); return; }
+
+  const assessorName = document.getElementById('assessorName').value.trim();
+  if (!assessorName) {
+    document.getElementById('assessorName').focus();
+    document.getElementById('assessorName').style.borderColor = 'var(--tier1)';
+    setTimeout(() => document.getElementById('assessorName').style.borderColor = '', 2000);
+    return;
+  }
+
+  userName = assessorName;
+  userId = generateUserId();
+  sessionId = generateSessionId();
+
+  orgInfo = {
+    name,
+    industry: document.getElementById('orgIndustry').value,
+    assessor: assessorName,
+    date: new Date().toISOString().split('T')[0]
+  };
+
+  sessionRef = db.ref('sessions/' + sessionId);
+  sessionRef.set({
+    meta: {
+      orgName: orgInfo.name,
+      industry: orgInfo.industry,
+      createdBy: userName,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    },
+    answers: {},
+    presence: {}
+  }).then(() => {
+    isCollaborative = true;
+    setupAnswerListeners();
+    setupPresence();
+    setupPresenceListener();
+    activateSessionUI();
+    window.location.hash = 'session=' + sessionId;
+
+    showScreen('screenAssessment');
+    buildSidebar();
+    navigateToCategory(0);
+    document.getElementById('topProgress').style.display = 'block';
+    document.getElementById('btnSave').style.display = 'inline-flex';
+    updateProgress();
+  }).catch(err => {
+    alert('Failed to create session: ' + err.message);
+  });
+}
+
+function openJoinModal() {
+  if (!firebaseReady) {
+    alert('Firebase is not configured. Please add your Firebase config to the code first.\n\nSee the FIREBASE_CONFIG section in index.html.');
+    return;
+  }
+  document.getElementById('joinModal').classList.add('visible');
+  document.getElementById('joinError').textContent = '';
+  document.getElementById('joinCode').value = '';
+  const assessorVal = document.getElementById('assessorName').value.trim();
+  document.getElementById('collabName').value = assessorVal;
+  document.getElementById('collabName').focus();
+}
+
+function closeCollabModal() {
+  document.getElementById('joinModal').classList.remove('visible');
+}
+
+function joinSession() {
+  const name = document.getElementById('collabName').value.trim();
+  if (!name) {
+    document.getElementById('joinError').textContent = 'Please enter your name';
+    return;
+  }
+  const code = document.getElementById('joinCode').value.trim().toUpperCase();
+  if (!code || code.length !== 6) {
+    document.getElementById('joinError').textContent = 'Enter a valid 6-character session code';
+    return;
+  }
+
+  document.getElementById('joinBtn').disabled = true;
+  document.getElementById('joinError').textContent = 'Connecting...';
+
+  const ref = db.ref('sessions/' + code);
+  ref.child('meta').once('value').then(snap => {
+    if (!snap.exists()) {
+      document.getElementById('joinError').textContent = 'Session not found. Check the code and try again.';
+      document.getElementById('joinBtn').disabled = false;
+      return;
+    }
+
+    const meta = snap.val();
+    userName = name;
+    userId = generateUserId();
+    sessionId = code;
+    sessionRef = ref;
+
+    orgInfo = {
+      name: meta.orgName,
+      industry: meta.industry || '',
+      assessor: name,
+      date: new Date().toISOString().split('T')[0]
+    };
+
+    // Load existing answers
+    return ref.child('answers').once('value').then(ansSnap => {
+      const data = ansSnap.val() || {};
+      Object.keys(data).forEach(key => {
+        const subId = decodeSubId(key);
+        answers[subId] = data[key].value;
+        answerMeta[subId] = { updatedBy: data[key].updatedBy, updatedAt: data[key].updatedAt };
+      });
+
+      isCollaborative = true;
+      setupAnswerListeners();
+      setupPresence();
+      setupPresenceListener();
+      activateSessionUI();
+      closeCollabModal();
+      window.location.hash = 'session=' + sessionId;
+
+      document.getElementById('orgName').value = orgInfo.name;
+      document.getElementById('orgIndustry').value = orgInfo.industry;
+      document.getElementById('assessorName').value = orgInfo.assessor;
+
+      showScreen('screenAssessment');
+      buildSidebar();
+      navigateToCategory(0);
+      document.getElementById('topProgress').style.display = 'block';
+      document.getElementById('btnSave').style.display = 'inline-flex';
+      updateProgress();
+    });
+  }).catch(err => {
+    document.getElementById('joinError').textContent = 'Connection error: ' + err.message;
+    document.getElementById('joinBtn').disabled = false;
+  });
+}
+
+function leaveSession() {
+  if (sessionRef && userId) {
+    sessionRef.child('presence/' + userId).remove();
+  }
+  if (sessionRef) {
+    sessionRef.child('answers').off();
+    sessionRef.child('presence').off();
+  }
+  isCollaborative = false;
+  sessionId = null;
+  sessionRef = null;
+  userId = null;
+  collaborators = {};
+  answerMeta = {};
+  window.location.hash = '';
+
+  document.getElementById('sessionBar').classList.remove('visible');
+  document.body.classList.remove('collab-active');
+  showScreen('screenWelcome');
+  document.getElementById('topProgress').style.display = 'none';
+}
+
+function activateSessionUI() {
+  document.getElementById('sessionCode').textContent = sessionId;
+  document.getElementById('sessionBar').classList.add('visible');
+  document.body.classList.add('collab-active');
+}
+
+function copySessionCode() {
+  navigator.clipboard.writeText(sessionId).then(() => {
+    const el = document.getElementById('sessionCode');
+    const orig = el.textContent;
+    el.textContent = 'COPIED!';
+    setTimeout(() => el.textContent = orig, 1200);
+  });
+}
+
+function copySessionLink() {
+  const url = window.location.origin + window.location.pathname + '#session=' + sessionId;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.querySelector('.copy-link-btn');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1200);
+  });
+}
+
+// ====== REAL-TIME ANSWER SYNC ======
+function setupAnswerListeners() {
+  // Listen for new answers and changes
+  sessionRef.child('answers').on('child_added', snap => {
+    handleRemoteAnswer(snap);
+  });
+  sessionRef.child('answers').on('child_changed', snap => {
+    handleRemoteAnswer(snap);
+  });
+}
+
+function handleRemoteAnswer(snap) {
+  const subId = decodeSubId(snap.key);
+  const data = snap.val();
+  if (!data) return;
+
+  // Skip if this was our own update (check timestamp proximity)
+  if (data.updatedBy === userName) return;
+
+  answers[subId] = data.value;
+  answerMeta[subId] = { updatedBy: data.updatedBy, updatedAt: data.updatedAt };
+
+  // Update UI if the question card is currently visible
+  const card = document.getElementById('qcard_' + subId);
+  if (card) {
+    card.classList.add('answered', 'remote-flash');
+    card.querySelectorAll('.tier-option').forEach(o => o.classList.remove('selected'));
+    if (data.value === 0) {
+      card.querySelector('.tier-option.na-option').classList.add('selected');
+    } else if (data.value >= 1 && data.value <= 4) {
+      const options = card.querySelectorAll('.tier-option:not(.na-option)');
+      if (options[data.value - 1]) options[data.value - 1].classList.add('selected');
+    }
+    // Update or add attribution
+    let attrEl = card.querySelector('.answer-by');
+    if (!attrEl) {
+      attrEl = document.createElement('div');
+      attrEl.className = 'answer-by';
+      card.appendChild(attrEl);
+    }
+    attrEl.textContent = 'Answered by ' + data.updatedBy;
+
+    // Remove flash class after animation
+    setTimeout(() => card.classList.remove('remote-flash'), 1500);
+  }
+
+  updateProgress();
+  updateSidebar();
+
+  // Update nav count if visible
+  const currentGlobalIdx = getCurrentGlobalIdx();
+  const { cat } = allCategories[currentGlobalIdx];
+  const answeredInCat = cat.subs.filter(s => answers[s.id] !== undefined).length;
+  const navProgress = document.querySelector('.cat-progress');
+  if (navProgress) navProgress.textContent = `${answeredInCat} of ${cat.subs.length} answered in this category`;
+}
+
+function syncAnswerToFirebase(subId, tier) {
+  if (!isCollaborative || !sessionRef) return;
+  sessionRef.child('answers/' + encodeSubId(subId)).set({
+    value: tier,
+    updatedBy: userName,
+    updatedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+// ====== PRESENCE ======
+function setupPresence() {
+  const myPresenceRef = sessionRef.child('presence/' + userId);
+  myPresenceRef.set({
+    name: userName,
+    online: true,
+    lastSeen: firebase.database.ServerValue.TIMESTAMP,
+    currentCategory: null
+  });
+  myPresenceRef.onDisconnect().update({
+    online: false,
+    lastSeen: firebase.database.ServerValue.TIMESTAMP
+  });
+
+  // Update connectivity indicator
+  db.ref('.info/connected').on('value', snap => {
+    const dot = document.querySelector('#firebaseStatus .status-dot');
+    if (dot) {
+      if (snap.val()) {
+        dot.classList.remove('offline');
+      } else {
+        dot.classList.add('offline');
+      }
+    }
+  });
+}
+
+function updateMyCategory(catId) {
+  if (!isCollaborative || !sessionRef || !userId) return;
+  sessionRef.child('presence/' + userId + '/currentCategory').set(catId);
+  sessionRef.child('presence/' + userId + '/lastSeen').set(firebase.database.ServerValue.TIMESTAMP);
+}
+
+function setupPresenceListener() {
+  sessionRef.child('presence').on('value', snap => {
+    collaborators = snap.val() || {};
+    renderPresenceAvatars();
+    renderSidebarPresence();
+  });
+}
+
+function renderPresenceAvatars() {
+  const container = document.getElementById('presenceAvatars');
+  if (!container) return;
+  let html = '';
+  const entries = Object.entries(collaborators).filter(([id, p]) => p.online);
+  entries.forEach(([id, p]) => {
+    const color = getAvatarColor(p.name);
+    const initials = getInitials(p.name);
+    const isMe = id === userId;
+    const viewing = p.currentCategory ? ` — viewing ${p.currentCategory}` : '';
+    html += `<div class="presence-avatar" style="background:${color};${isMe ? 'box-shadow:0 0 0 2px var(--accent);' : ''}">
+      ${initials}
+      <div class="avatar-tooltip">${p.name}${isMe ? ' (you)' : ''}${viewing}</div>
+    </div>`;
+  });
+  const count = entries.length;
+  html += `<span style="font-size:11px;color:var(--text-dim);margin-left:4px;">${count} online</span>`;
+  container.innerHTML = html;
+}
+
+function renderSidebarPresence() {
+  // Show dots next to categories where others are working
+  document.querySelectorAll('.sidebar-presence-dots').forEach(el => el.remove());
+
+  const otherUsers = Object.entries(collaborators).filter(([id, p]) => p.online && id !== userId && p.currentCategory);
+  if (otherUsers.length === 0) return;
+
+  // Group by category
+  const catUsers = {};
+  otherUsers.forEach(([id, p]) => {
+    if (!catUsers[p.currentCategory]) catUsers[p.currentCategory] = [];
+    catUsers[p.currentCategory].push(p);
+  });
+
+  // Find sidebar category elements and add dots
+  let globalIdx = 0;
+  CSF_DATA.forEach(fn => {
+    fn.categories.forEach(cat => {
+      if (catUsers[cat.id]) {
+        const sbCat = document.getElementById('sbCat' + globalIdx);
+        if (sbCat) {
+          const dotsDiv = document.createElement('span');
+          dotsDiv.className = 'sidebar-presence-dots';
+          catUsers[cat.id].forEach(p => {
+            const dot = document.createElement('span');
+            dot.className = 'sidebar-presence-dot';
+            dot.style.background = getAvatarColor(p.name);
+            dot.title = p.name;
+            dotsDiv.appendChild(dot);
+          });
+          sbCat.appendChild(dotsDiv);
+        }
+      }
+      globalIdx++;
+    });
+  });
+}
+
+// ====== URL HASH SESSION AUTO-JOIN ======
+function checkUrlForSession() {
+  const hash = window.location.hash;
+  const match = hash.match(/session=([A-Z0-9]{6})/i);
+  if (match && firebaseReady) {
+    const code = match[1].toUpperCase();
+    document.getElementById('joinCode').value = code;
+    openJoinModal();
+  }
+}
+
+// Check on page load
+window.addEventListener('load', checkUrlForSession);
+
+// Flatten all categories for navigation
+function getAllCategories() {
+  const cats = [];
+  CSF_DATA.forEach((fn, fi) => {
+    fn.categories.forEach((cat, ci) => {
+      cats.push({ fn, fnIdx: fi, cat, catIdx: ci });
+    });
+  });
+  return cats;
+}
+
+const allCategories = getAllCategories();
+
+function getTotalSubs() {
+  return CSF_DATA.reduce((s, f) => s + f.categories.reduce((s2, c) => s2 + c.subs.length, 0), 0);
+}
+
+function getAnsweredCount() {
+  return Object.keys(answers).length;
+}
+
+// ====== WELCOME ======
+function startAssessment() {
+  const name = document.getElementById('orgName').value.trim();
+  if (!name) { document.getElementById('orgName').focus(); return; }
+  orgInfo = {
+    name,
+    industry: document.getElementById('orgIndustry').value,
+    assessor: document.getElementById('assessorName').value.trim(),
+    date: new Date().toISOString().split('T')[0]
+  };
+  showScreen('screenAssessment');
+  buildSidebar();
+  navigateToCategory(0);
+  document.getElementById('topProgress').style.display = 'block';
+  document.getElementById('btnSave').style.display = 'inline-flex';
+  updateProgress();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ====== SIDEBAR ======
+function buildSidebar() {
+  const sb = document.getElementById('sidebar');
+  let html = '';
+  let globalIdx = 0;
+  CSF_DATA.forEach((fn, fi) => {
+    html += `<div class="sidebar-section" id="sbSec${fi}">
+      <div class="sidebar-function" onclick="toggleSidebarSection(${fi})" style="border-left-color:${fn.color}">
+        <span class="fn-dot" style="background:${fn.color}"></span>
+        ${fn.name}
+        <span class="fn-score" id="sbFnScore${fi}">--</span>
+      </div>
+      <div class="sidebar-categories">`;
+    fn.categories.forEach((cat, ci) => {
+      const idx = globalIdx;
+      html += `<div class="sidebar-category" id="sbCat${idx}" onclick="navigateToCategory(${idx})">
+        <span>${cat.id}</span>
+        <span class="sidebar-cat-check" id="sbCatCheck${idx}"></span>
+      </div>`;
+      globalIdx++;
+    });
+    html += `</div></div>`;
+  });
+  sb.innerHTML = html;
+}
+
+function toggleSidebarSection(fi) {
+  const sec = document.getElementById(`sbSec${fi}`);
+  sec.classList.toggle('expanded');
+}
+
+function updateSidebar() {
+  let globalIdx = 0;
+  CSF_DATA.forEach((fn, fi) => {
+    const fnScore = calcFunctionScore(fn);
+    const el = document.getElementById(`sbFnScore${fi}`);
+    if (el) el.textContent = fnScore !== null ? fnScore.toFixed(1) : '--';
+
+    fn.categories.forEach((cat, ci) => {
+      const check = document.getElementById(`sbCatCheck${globalIdx}`);
+      const catEl = document.getElementById(`sbCat${globalIdx}`);
+      const answered = cat.subs.filter(s => answers[s.id] !== undefined).length;
+      if (answered === cat.subs.length) {
+        check.textContent = '\u2713';
+        catEl.classList.add('completed');
+      } else if (answered > 0) {
+        check.textContent = `${answered}/${cat.subs.length}`;
+        catEl.classList.remove('completed');
+      }
+      globalIdx++;
+    });
+  });
+}
+
+// ====== ASSESSMENT ======
+function navigateToCategory(globalIdx) {
+  if (globalIdx < 0 || globalIdx >= allCategories.length) return;
+  const { fn, fnIdx, cat, catIdx } = allCategories[globalIdx];
+  currentFnIdx = fnIdx;
+  currentCatIdx = catIdx;
+
+  // Expand sidebar section
+  document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('expanded'));
+  document.getElementById(`sbSec${fnIdx}`).classList.add('expanded');
+  document.querySelectorAll('.sidebar-category').forEach(s => s.classList.remove('active'));
+  const sbCat = document.getElementById(`sbCat${globalIdx}`);
+  if (sbCat) sbCat.classList.add('active');
+
+  // Update presence
+  updateMyCategory(cat.id);
+
+  const content = document.getElementById('assessmentContent');
+  let html = `
+    <div class="cat-header">
+      <div class="fn-badge" style="color:${fn.color}; border-color:${fn.color}30; background:${fn.color}10;">
+        <span class="fn-dot" style="background:${fn.color}; width:6px; height:6px; border-radius:50%; display:inline-block;"></span>
+        ${fn.id} - ${fn.name}
+      </div>
+      <h2>${cat.id}: ${cat.name}</h2>
+      <p>${cat.desc}</p>
+    </div>`;
+
+  cat.subs.forEach(sub => {
+    const ans = answers[sub.id];
+    const meta = answerMeta[sub.id];
+    const attribution = (isCollaborative && meta && meta.updatedBy && meta.updatedBy !== userName)
+      ? `<div class="answer-by">Answered by ${meta.updatedBy}</div>` : '';
+    html += `
+    <div class="question-card ${ans !== undefined ? 'answered' : ''}" id="qcard_${sub.id}">
+      <div class="q-id">${sub.id}</div>
+      <div class="q-text">${sub.text}</div>
+      ${sub.hint ? `<div class="q-hint">${sub.hint}</div>` : ''}
+      <div class="tier-options">`;
+    TIER_INFO.forEach((t, ti) => {
+      const sel = ans === t.tier ? 'selected' : '';
+      // Use contextual tier description if available, otherwise fall back to generic
+      const desc = (sub.tiers && sub.tiers[ti]) ? sub.tiers[ti] : t.short;
+      html += `
+        <div class="tier-option t${t.tier} ${sel}" onclick="selectTier('${sub.id}', ${t.tier}, this)">
+          <div class="tier-label"><span class="tier-num">${t.tier}</span> ${t.name}</div>
+          <div class="tier-desc">${desc}</div>
+        </div>`;
+    });
+    const naSel = ans === 0 ? 'selected' : '';
+    html += `
+        <div class="tier-option na-option tna ${naSel}" onclick="selectTier('${sub.id}', 0, this)">
+          <div class="tier-label"><span class="tier-num">-</span> Not Applicable</div>
+          <div class="tier-desc">This doesn't apply to our organization</div>
+        </div>`;
+    html += `</div>${attribution}</div>`;
+  });
+
+  // Navigation
+  const isFirst = globalIdx === 0;
+  const isLast = globalIdx === allCategories.length - 1;
+  const answeredInCat = cat.subs.filter(s => answers[s.id] !== undefined).length;
+
+  html += `
+    <div class="cat-nav">
+      <button class="btn btn-secondary" ${isFirst ? 'disabled' : ''} onclick="navigateToCategory(${globalIdx - 1})">&larr; Previous</button>
+      <span class="cat-progress">${answeredInCat} of ${cat.subs.length} answered in this category</span>
+      ${isLast
+        ? `<button class="btn btn-primary" onclick="showResults()">View Results &rarr;</button>`
+        : `<button class="btn btn-primary" onclick="navigateToCategory(${globalIdx + 1})">Next &rarr;</button>`
+      }
+    </div>`;
+
+  content.innerHTML = html;
+  content.scrollTop = 0;
+  window.scrollTo(0, 56);
+}
+
+function selectTier(subId, tier, el) {
+  answers[subId] = tier;
+  answerMeta[subId] = { updatedBy: userName || orgInfo.assessor || 'You', updatedAt: Date.now() };
+
+  // Sync to Firebase if collaborative
+  syncAnswerToFirebase(subId, tier);
+
+  // Update UI
+  const card = document.getElementById(`qcard_${subId}`);
+  card.classList.add('answered');
+  card.querySelectorAll('.tier-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+
+  updateProgress();
+  updateSidebar();
+
+  // Update nav count
+  const currentGlobalIdx = getCurrentGlobalIdx();
+  const { cat } = allCategories[currentGlobalIdx];
+  const answeredInCat = cat.subs.filter(s => answers[s.id] !== undefined).length;
+  const navProgress = document.querySelector('.cat-progress');
+  if (navProgress) navProgress.textContent = `${answeredInCat} of ${cat.subs.length} answered in this category`;
+}
+
+function getCurrentGlobalIdx() {
+  let idx = 0;
+  for (let fi = 0; fi < CSF_DATA.length; fi++) {
+    for (let ci = 0; ci < CSF_DATA[fi].categories.length; ci++) {
+      if (fi === currentFnIdx && ci === currentCatIdx) return idx;
+      idx++;
+    }
+  }
+  return 0;
+}
+
+function updateProgress() {
+  const total = getTotalSubs();
+  const answered = getAnsweredCount();
+  const pct = total > 0 ? (answered / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${answered} of ${total} answered (${Math.round(pct)}%)`;
+}
+
+// ====== SCORING ======
+function calcCategoryScore(cat) {
+  const scored = cat.subs.filter(s => answers[s.id] !== undefined && answers[s.id] > 0);
+  if (scored.length === 0) return null;
+  return scored.reduce((s, sub) => s + answers[sub.id], 0) / scored.length;
+}
+
+function calcFunctionScore(fn) {
+  const catScores = fn.categories.map(c => calcCategoryScore(c)).filter(s => s !== null);
+  if (catScores.length === 0) return null;
+  return catScores.reduce((s, v) => s + v, 0) / catScores.length;
+}
+
+function calcOverallScore() {
+  const fnScores = CSF_DATA.map(f => calcFunctionScore(f)).filter(s => s !== null);
+  if (fnScores.length === 0) return null;
+  return fnScores.reduce((s, v) => s + v, 0) / fnScores.length;
+}
+
+function getTierName(score) {
+  if (score === null) return 'N/A';
+  if (score < 1.5) return 'Starting Out';
+  if (score < 2.5) return 'Developing';
+  if (score < 3.5) return 'Established';
+  return 'Advanced';
+}
+
+function getTierClass(score) {
+  if (score === null) return '';
+  if (score < 1.5) return 't1';
+  if (score < 2.5) return 't2';
+  if (score < 3.5) return 't3';
+  return 't4';
+}
+
+function getScoreColor(score) {
+  if (score === null) return '#666';
+  if (score < 1.5) return 'var(--tier1)';
+  if (score < 2.5) return 'var(--tier2)';
+  if (score < 3.5) return 'var(--tier3)';
+  return 'var(--tier4)';
+}
+
+// ====== RESULTS ======
+function showResults() {
+  showScreen('screenResults');
+  document.getElementById('topProgress').style.display = 'none';
+  renderResults();
+}
+
+function renderResults() {
+  const overall = calcOverallScore();
+  const rc = document.getElementById('resultsContent');
+
+  let html = `
+    <div class="results-header">
+      <h1>Assessment Results</h1>
+      <div class="org-name">${orgInfo.name}${orgInfo.industry ? ' - ' + orgInfo.industry : ''}</div>
+      <div class="date">Assessed: ${orgInfo.date}${orgInfo.assessor ? ' by ' + orgInfo.assessor : ''} | NIST CSF 2.0</div>
+      <div style="font-size:11px; color:var(--text-dim); margin-top:6px;">Developed by Moran Tomer &mdash; All rights reserved</div>
+    </div>
+    <div class="results-grid">`;
+
+  // Overall Score
+  const overallPct = overall ? (overall / 4 * 100) : 0;
+  const circumference = 2 * Math.PI * 85;
+  const dashoffset = circumference - (overallPct / 100) * circumference;
+  html += `
+    <div class="result-card overall-score">
+      <h3>&#127919; Overall Maturity Score</h3>
+      <div class="score-ring">
+        <svg width="200" height="200">
+          <circle cx="100" cy="100" r="85" fill="none" stroke="var(--surface2)" stroke-width="12"/>
+          <circle cx="100" cy="100" r="85" fill="none" stroke="${getScoreColor(overall)}"
+            stroke-width="12" stroke-linecap="round"
+            stroke-dasharray="${circumference}" stroke-dashoffset="${dashoffset}"
+            style="transition: stroke-dashoffset 1.5s ease;"/>
+        </svg>
+        <div class="score-value" style="color:${getScoreColor(overall)}">${overall ? overall.toFixed(2) : 'N/A'}</div>
+        <div class="score-label">${getTierName(overall)}</div>
+      </div>
+      <div style="color:var(--text-dim); font-size:13px;">
+        ${getAnsweredCount()} of ${getTotalSubs()} subcategories assessed
+      </div>
+    </div>`;
+
+  // Function Scores Bar Chart with Industry Comparison
+  const bench = getIndustryBenchmark();
+  const benchOverall = getIndustryOverall(bench);
+  const indLabel = orgInfo.industry || 'Cross-Industry';
+
+  html += `<div class="result-card">
+    <h3>&#128202; Function Scores vs. ${indLabel} Average</h3>
+    <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Benchmark data as of ${BENCHMARK_DATE} &mdash; Sources: ${BENCHMARK_SOURCES}</div>
+    <div class="bench-legend">
+      <span><span class="dot" style="background:var(--accent);"></span> Your Score</span>
+      <span><span class="dot" style="background:#888; opacity:0.5;"></span> ${indLabel} Average</span>
+    </div>`;
+  CSF_DATA.forEach(fn => {
+    const score = calcFunctionScore(fn);
+    const indScore = bench[fn.id];
+    const pct = score ? (score / 4 * 100) : 0;
+    const indPct = indScore ? (indScore / 4 * 100) : 0;
+    const delta = score ? (score - indScore) : 0;
+    const deltaClass = delta > 0.2 ? 'positive' : delta < -0.2 ? 'negative' : 'neutral';
+    const deltaSign = delta > 0 ? '+' : '';
+    html += `
+      <div class="bench-row">
+        <div class="bench-name" style="color:${fn.color}">${fn.name}</div>
+        <div class="bench-bar-wrap">
+          <div class="bench-bar yours" style="width:${pct}%; background:${fn.color};"></div>
+          <div class="bench-bar industry" style="width:${indPct}%; background:#888;"></div>
+        </div>
+        <div class="bench-vals">
+          <div class="yours-val" style="color:${getScoreColor(score)}">${score ? score.toFixed(1) : 'N/A'}</div>
+          <div class="ind-val">${indScore.toFixed(1)} avg</div>
+        </div>
+        ${score ? `<span class="bench-delta ${deltaClass}">${deltaSign}${delta.toFixed(1)}</span>` : ''}
+      </div>`;
+  });
+  // Overall comparison
+  const overallDelta = overall ? (overall - benchOverall) : 0;
+  const overallDeltaClass = overallDelta > 0.2 ? 'positive' : overallDelta < -0.2 ? 'negative' : 'neutral';
+  html += `
+    <div class="bench-row" style="border-top:2px solid var(--border); margin-top:8px; padding-top:14px;">
+      <div class="bench-name" style="font-weight:800;">Overall</div>
+      <div class="bench-bar-wrap">
+        <div class="bench-bar yours" style="width:${overallPct}%; background:var(--accent);"></div>
+        <div class="bench-bar industry" style="width:${benchOverall/4*100}%; background:#888;"></div>
+      </div>
+      <div class="bench-vals">
+        <div class="yours-val" style="color:${getScoreColor(overall)}">${overall ? overall.toFixed(1) : 'N/A'}</div>
+        <div class="ind-val">${benchOverall.toFixed(1)} avg</div>
+      </div>
+      ${overall ? `<span class="bench-delta ${overallDeltaClass}">${overallDelta > 0 ? '+' : ''}${overallDelta.toFixed(1)}</span>` : ''}
+    </div>`;
+  html += `</div>`;
+
+  // Radar Chart with Industry Overlay
+  html += `<div class="result-card full-width">
+    <h3>&#128376; Maturity Radar — You vs. ${indLabel}</h3>
+    <div class="radar-container">${renderRadarChart(bench)}</div>
+    <div class="bench-legend" style="justify-content:center; margin-top:8px;">
+      <span><span class="dot" style="background:var(--accent);"></span> Your Scores</span>
+      <span><span class="dot" style="background:#f59e0b; opacity:0.5;"></span> ${indLabel} Average</span>
+    </div>
+  </div>`;
+
+  // Category Detail Table
+  html += `<div class="result-card full-width">
+    <h3>&#128220; Category Breakdown</h3>
+    <table class="cat-detail-table">
+      <thead><tr>
+        <th>Function</th><th>Category</th><th>Score</th><th>Tier</th><th>Assessed</th>
+      </tr></thead><tbody>`;
+  CSF_DATA.forEach(fn => {
+    fn.categories.forEach(cat => {
+      const score = calcCategoryScore(cat);
+      const answered = cat.subs.filter(s => answers[s.id] !== undefined).length;
+      html += `<tr>
+        <td style="color:${fn.color}; font-weight:600;">${fn.id}</td>
+        <td>${cat.id}: ${cat.name}</td>
+        <td style="font-weight:700;">${score !== null ? score.toFixed(2) : 'N/A'}</td>
+        <td><span class="tier-badge ${getTierClass(score)}">${getTierName(score)}</span></td>
+        <td style="color:var(--text-dim);">${answered}/${cat.subs.length}</td>
+      </tr>`;
+    });
+  });
+  html += `</tbody></table></div>`;
+
+  // Recommendations
+  html += `<div class="result-card full-width">
+    <h3>&#128161; Key Recommendations</h3>`;
+  const recs = generateRecommendations();
+  recs.forEach(r => {
+    html += `<div class="rec-item" style="border-left-color:${r.color}">
+      <div class="rec-priority" style="color:${r.color}">${r.priority}</div>
+      <div class="rec-text">${r.text}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Detailed Subcategory Results
+  html += `<div class="result-card full-width">
+    <h3>&#128203; Full Subcategory Detail</h3>
+    <table class="cat-detail-table">
+      <thead><tr>
+        <th>ID</th><th>Description</th><th>Score</th><th>Tier</th>
+      </tr></thead><tbody>`;
+  CSF_DATA.forEach(fn => {
+    fn.categories.forEach(cat => {
+      cat.subs.forEach(sub => {
+        const val = answers[sub.id];
+        const tierName = val === undefined ? 'Not Assessed' : (val === 0 ? 'N/A' : getTierName(val));
+        const tierCls = val === undefined || val === 0 ? '' : getTierClass(val);
+        html += `<tr>
+          <td style="font-family:monospace;font-weight:600;color:${fn.color};">${sub.id}</td>
+          <td style="font-size:12px;">${sub.text}</td>
+          <td style="font-weight:700;">${val !== undefined ? (val === 0 ? 'N/A' : val) : '-'}</td>
+          <td><span class="tier-badge ${tierCls}">${tierName}</span></td>
+        </tr>`;
+      });
+    });
+  });
+  html += `</tbody></table></div>`;
+
+  // Export
+  html += `
+    <div class="export-bar">
+      <button class="btn btn-primary btn-lg" onclick="exportPPTX()" style="background:linear-gradient(135deg, #d97706, #ef4444);">&#128218; Export PowerPoint</button>
+      <button class="btn btn-primary btn-lg" onclick="exportJSON()">&#128229; Export JSON</button>
+      <button class="btn btn-secondary btn-lg" onclick="exportCSV()">&#128196; Export CSV</button>
+      <button class="btn btn-secondary btn-lg" onclick="window.print()">&#128424; Print</button>
+      <button class="btn btn-secondary btn-lg" onclick="backToAssessment()">&#9998; Edit Answers</button>
+    </div>
+    <div style="text-align:center; padding:24px 16px 40px; color:var(--text-dim); font-size:12px; border-top:1px solid var(--border); margin-top:16px;">
+      &copy; 2026 Moran Tomer. All rights reserved. This assessment tool and its contents may not be reproduced or distributed without permission.
+    </div>`;
+
+  html += `</div>`;
+  rc.innerHTML = html;
+}
+
+function renderRadarChart(bench) {
+  const size = 400;
+  const center = size / 2;
+  const maxR = 150;
+  const fnIds = ['GV','ID','PR','DE','RS','RC'];
+  const functions = CSF_DATA.map(f => ({
+    name: f.name,
+    id: f.id,
+    score: calcFunctionScore(f) || 0,
+    color: f.color
+  }));
+  const n = functions.length;
+  const angleStep = (2 * Math.PI) / n;
+
+  let svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+
+  // Grid rings
+  for (let ring = 1; ring <= 4; ring++) {
+    const r = (ring / 4) * maxR;
+    let points = [];
+    for (let i = 0; i < n; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      points.push(`${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`);
+    }
+    svg += `<polygon points="${points.join(' ')}" fill="none" stroke="var(--border)" stroke-width="1" opacity="0.5"/>`;
+    svg += `<text x="${center + 8}" y="${center - r + 4}" fill="var(--text-dim)" font-size="10">${ring}</text>`;
+  }
+
+  // Axes
+  for (let i = 0; i < n; i++) {
+    const angle = i * angleStep - Math.PI / 2;
+    const x2 = center + maxR * Math.cos(angle);
+    const y2 = center + maxR * Math.sin(angle);
+    svg += `<line x1="${center}" y1="${center}" x2="${x2}" y2="${y2}" stroke="var(--border)" stroke-width="1" opacity="0.3"/>`;
+    const lx = center + (maxR + 25) * Math.cos(angle);
+    const ly = center + (maxR + 25) * Math.sin(angle);
+    svg += `<text x="${lx}" y="${ly}" fill="${functions[i].color}" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="middle">${functions[i].name}</text>`;
+  }
+
+  // Industry benchmark polygon (if provided)
+  if (bench) {
+    let benchPoints = [];
+    for (let i = 0; i < n; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const r = ((bench[functions[i].id] || 0) / 4) * maxR;
+      benchPoints.push(`${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`);
+    }
+    svg += `<polygon points="${benchPoints.join(' ')}" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,4" opacity="0.6"/>`;
+  }
+
+  // Your data polygon
+  let dataPoints = [];
+  for (let i = 0; i < n; i++) {
+    const angle = i * angleStep - Math.PI / 2;
+    const r = (functions[i].score / 4) * maxR;
+    dataPoints.push(`${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`);
+  }
+  svg += `<polygon points="${dataPoints.join(' ')}" fill="rgba(59,130,246,0.15)" stroke="var(--accent)" stroke-width="2"/>`;
+
+  // Data dots
+  for (let i = 0; i < n; i++) {
+    const angle = i * angleStep - Math.PI / 2;
+    const r = (functions[i].score / 4) * maxR;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    svg += `<circle cx="${x}" cy="${y}" r="5" fill="${functions[i].color}" stroke="#fff" stroke-width="2"/>`;
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
+
+function generateRecommendations() {
+  const recs = [];
+
+  // Find lowest scoring categories
+  const catScores = [];
+  CSF_DATA.forEach(fn => {
+    fn.categories.forEach(cat => {
+      const score = calcCategoryScore(cat);
+      if (score !== null) {
+        catScores.push({ fn, cat, score });
+      }
+    });
+  });
+  catScores.sort((a, b) => a.score - b.score);
+
+  // Critical (Tier 1)
+  catScores.filter(c => c.score < 1.5).slice(0, 3).forEach(c => {
+    recs.push({
+      priority: 'CRITICAL',
+      color: 'var(--tier1)',
+      text: `<strong>${c.cat.id} (${c.cat.name})</strong> scored ${c.score.toFixed(1)} — currently at Tier 1 (Partial). This area lacks formal processes and requires immediate attention. Establish documented policies and assign clear ownership.`
+    });
+  });
+
+  // High priority (Tier 2)
+  catScores.filter(c => c.score >= 1.5 && c.score < 2.5).slice(0, 3).forEach(c => {
+    recs.push({
+      priority: 'HIGH PRIORITY',
+      color: 'var(--tier2)',
+      text: `<strong>${c.cat.id} (${c.cat.name})</strong> scored ${c.score.toFixed(1)} — at Tier 2 (Risk Informed). Practices exist but are not consistently applied enterprise-wide. Formalize policies and ensure consistent implementation across all business units.`
+    });
+  });
+
+  // Moderate (Tier 3 areas that could improve)
+  catScores.filter(c => c.score >= 2.5 && c.score < 3.5).slice(0, 2).forEach(c => {
+    recs.push({
+      priority: 'MODERATE',
+      color: 'var(--tier3)',
+      text: `<strong>${c.cat.id} (${c.cat.name})</strong> scored ${c.score.toFixed(1)} — at Tier 3 (Repeatable). Consider advancing to Tier 4 by implementing continuous improvement processes, predictive analytics, and automated controls.`
+    });
+  });
+
+  // Unanswered
+  const unanswered = getTotalSubs() - getAnsweredCount();
+  if (unanswered > 0) {
+    recs.push({
+      priority: 'NOTE',
+      color: 'var(--text-dim)',
+      text: `${unanswered} subcategories were not assessed. Complete the full assessment for a comprehensive maturity picture.`
+    });
+  }
+
+  if (recs.length === 0) {
+    recs.push({
+      priority: 'EXCELLENT',
+      color: 'var(--tier4)',
+      text: 'Your organization demonstrates strong cybersecurity maturity across all assessed areas. Continue monitoring and adapting to evolving threats.'
+    });
+  }
+
+  return recs;
+}
+
+function backToAssessment() {
+  showScreen('screenAssessment');
+  document.getElementById('topProgress').style.display = 'block';
+  navigateToCategory(getCurrentGlobalIdx());
+}
+
+// ====== EXPORT ======
+function exportJSON() {
+  const report = {
+    framework: "NIST CSF 2.0",
+    organization: orgInfo,
+    overallScore: calcOverallScore(),
+    overallTier: getTierName(calcOverallScore()),
+    functions: CSF_DATA.map(fn => ({
+      id: fn.id, name: fn.name,
+      score: calcFunctionScore(fn),
+      tier: getTierName(calcFunctionScore(fn)),
+      categories: fn.categories.map(cat => ({
+        id: cat.id, name: cat.name,
+        score: calcCategoryScore(cat),
+        tier: getTierName(calcCategoryScore(cat)),
+        subcategories: cat.subs.map(sub => ({
+          id: sub.id, description: sub.text,
+          score: answers[sub.id] !== undefined ? answers[sub.id] : null,
+          tier: answers[sub.id] !== undefined && answers[sub.id] > 0 ? getTierName(answers[sub.id]) : (answers[sub.id] === 0 ? 'N/A' : 'Not Assessed')
+        }))
+      }))
+    })),
+    answeredCount: getAnsweredCount(),
+    totalSubcategories: getTotalSubs(),
+    generatedAt: new Date().toISOString()
+  };
+
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `NIST-CSF2-Assessment-${orgInfo.name.replace(/\s+/g, '-')}-${orgInfo.date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportCSV() {
+  let csv = 'Function,Category,Subcategory ID,Description,Score,Tier\n';
+  CSF_DATA.forEach(fn => {
+    fn.categories.forEach(cat => {
+      cat.subs.forEach(sub => {
+        const val = answers[sub.id];
+        const score = val !== undefined ? (val === 0 ? 'N/A' : val) : '';
+        const tier = val !== undefined ? (val === 0 ? 'N/A' : getTierName(val)) : 'Not Assessed';
+        csv += `"${fn.name}","${cat.name}","${sub.id}","${sub.text.replace(/"/g, '""')}",${score},"${tier}"\n`;
+      });
+    });
+  });
+
+  // Add summary rows
+  csv += '\n\nSummary\nLevel,Name,Score,Tier\n';
+  csv += `Overall,${orgInfo.name},${calcOverallScore() ? calcOverallScore().toFixed(2) : 'N/A'},${getTierName(calcOverallScore())}\n`;
+  CSF_DATA.forEach(fn => {
+    const s = calcFunctionScore(fn);
+    csv += `Function,${fn.name},${s ? s.toFixed(2) : 'N/A'},${getTierName(s)}\n`;
+    fn.categories.forEach(cat => {
+      const cs = calcCategoryScore(cat);
+      csv += `Category,${cat.id}: ${cat.name},${cs ? cs.toFixed(2) : 'N/A'},${getTierName(cs)}\n`;
+    });
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `NIST-CSF2-Assessment-${orgInfo.name.replace(/\s+/g, '-')}-${orgInfo.date}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ====== POWERPOINT EXPORT ======
+function exportPPTX() {
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE'; // 13.33 x 7.5 inches
+  pptx.author = 'Moran Tomer';
+  pptx.company = 'Moran Tomer';
+  pptx.title = `NIST CSF 2.0 Assessment - ${orgInfo.name}`;
+  pptx.subject = 'NIST CSF 2.0 Assessment Report - Developed by Moran Tomer';
+
+  const overall = calcOverallScore();
+  const bench = getIndustryBenchmark();
+  const benchOverall = getIndustryOverall(bench);
+  const indLabel = orgInfo.industry || 'Cross-Industry';
+
+  // Color helpers
+  const BG = '0A0E17';
+  const SURFACE = '111827';
+  const TEXT = 'E2E8F0';
+  const DIM = '8899AA';
+  const ACCENT = '3B82F6';
+  const T1 = 'EF4444', T2 = 'F59E0B', T3 = '3B82F6', T4 = '10B981';
+  const fnColors = { GV: '8B5CF6', ID: '3B82F6', PR: '10B981', DE: 'F59E0B', RS: 'EF4444', RC: '06B6D4' };
+
+  function tierColor(score) {
+    if (!score) return DIM;
+    if (score < 1.5) return T1;
+    if (score < 2.5) return T2;
+    if (score < 3.5) return T3;
+    return T4;
+  }
+
+  function addBg(slide) {
+    slide.background = { color: BG };
+    slide.addText('\u00A9 2026 Moran Tomer', { x: 0.3, y: 7.1, w: 4, h: 0.3, fontSize: 8, fontFace: 'Segoe UI', color: '555555', italic: true });
+  }
+
+  // ---- SLIDE 1: Title ----
+  let slide = pptx.addSlide();
+  addBg(slide);
+  slide.addText('NIST CSF 2.0\nAssessment Report', { x: 0.8, y: 1.0, w: 11.7, h: 2.5, fontSize: 40, fontFace: 'Segoe UI', color: TEXT, bold: true, align: 'center', lineSpacingMultiple: 1.2 });
+  slide.addText(orgInfo.name, { x: 0.8, y: 3.5, w: 11.7, h: 0.8, fontSize: 28, fontFace: 'Segoe UI', color: ACCENT, bold: true, align: 'center' });
+  slide.addText([
+    { text: indLabel, options: { fontSize: 16, color: DIM } },
+    { text: '\n' },
+    { text: `Assessed: ${orgInfo.date}${orgInfo.assessor ? ' by ' + orgInfo.assessor : ''}`, options: { fontSize: 14, color: DIM } }
+  ], { x: 0.8, y: 4.5, w: 11.7, h: 1.2, fontFace: 'Segoe UI', align: 'center' });
+  slide.addText('Based on NIST Cybersecurity Framework 2.0  |  106 Subcategories  |  6 Functions', { x: 0.8, y: 5.8, w: 11.7, h: 0.5, fontSize: 11, fontFace: 'Segoe UI', color: DIM, align: 'center' });
+  slide.addText('Developed by Moran Tomer', { x: 0.8, y: 6.3, w: 11.7, h: 0.4, fontSize: 13, fontFace: 'Segoe UI', color: ACCENT, bold: true, align: 'center' });
+  slide.addText('\u00A9 2026 Moran Tomer. All rights reserved.', { x: 0.8, y: 6.8, w: 11.7, h: 0.3, fontSize: 9, fontFace: 'Segoe UI', color: DIM, align: 'center' });
+
+  // ---- SLIDE 2: Overall Score & Summary ----
+  slide = pptx.addSlide();
+  addBg(slide);
+  slide.addText('Overall Maturity Score', { x: 0.5, y: 0.3, w: 12, h: 0.6, fontSize: 24, fontFace: 'Segoe UI', color: TEXT, bold: true });
+
+  // Score box
+  slide.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: 1.1, w: 3.5, h: 3.0, fill: { color: SURFACE }, rectRadius: 0.15 });
+  slide.addText(overall ? overall.toFixed(2) : 'N/A', { x: 0.5, y: 1.3, w: 3.5, h: 1.8, fontSize: 54, fontFace: 'Segoe UI', color: tierColor(overall), bold: true, align: 'center', valign: 'middle' });
+  slide.addText(`${getTierName(overall)}`, { x: 0.5, y: 3.0, w: 3.5, h: 0.5, fontSize: 16, fontFace: 'Segoe UI', color: tierColor(overall), align: 'center' });
+  slide.addText(`${getAnsweredCount()} of ${getTotalSubs()} assessed`, { x: 0.5, y: 3.5, w: 3.5, h: 0.4, fontSize: 11, fontFace: 'Segoe UI', color: DIM, align: 'center' });
+
+  // Industry comparison box
+  slide.addShape(pptx.ShapeType.roundRect, { x: 4.3, y: 1.1, w: 4.0, h: 3.0, fill: { color: SURFACE }, rectRadius: 0.15 });
+  slide.addText(`vs. ${indLabel} Average`, { x: 4.3, y: 1.2, w: 4.0, h: 0.4, fontSize: 13, fontFace: 'Segoe UI', color: DIM, align: 'center' });
+  const delta = overall ? (overall - benchOverall) : 0;
+  const deltaText = delta > 0 ? `+${delta.toFixed(2)} ABOVE` : delta < 0 ? `${delta.toFixed(2)} BELOW` : 'AT AVERAGE';
+  const deltaColor = delta > 0.2 ? T4 : delta < -0.2 ? T1 : T2;
+  slide.addText(deltaText, { x: 4.3, y: 1.8, w: 4.0, h: 1.2, fontSize: 28, fontFace: 'Segoe UI', color: deltaColor, bold: true, align: 'center', valign: 'middle' });
+  slide.addText(`Industry Average: ${benchOverall.toFixed(2)}`, { x: 4.3, y: 3.2, w: 4.0, h: 0.4, fontSize: 13, fontFace: 'Segoe UI', color: DIM, align: 'center' });
+  slide.addText(`Your Score: ${overall ? overall.toFixed(2) : 'N/A'}`, { x: 4.3, y: 3.5, w: 4.0, h: 0.4, fontSize: 13, fontFace: 'Segoe UI', color: TEXT, align: 'center' });
+
+  // Key stats box
+  slide.addShape(pptx.ShapeType.roundRect, { x: 8.6, y: 1.1, w: 4.2, h: 3.0, fill: { color: SURFACE }, rectRadius: 0.15 });
+  slide.addText('Quick Summary', { x: 8.6, y: 1.2, w: 4.2, h: 0.4, fontSize: 13, fontFace: 'Segoe UI', color: DIM, align: 'center', bold: true });
+  const aboveCount = CSF_DATA.filter(f => { const s = calcFunctionScore(f); return s && s > bench[f.id]; }).length;
+  const belowCount = CSF_DATA.filter(f => { const s = calcFunctionScore(f); return s && s < bench[f.id]; }).length;
+  slide.addText([
+    { text: `${aboveCount} functions above average\n`, options: { fontSize: 14, color: T4 } },
+    { text: `${belowCount} functions below average\n`, options: { fontSize: 14, color: belowCount > 0 ? T1 : T4 } },
+    { text: `${6 - aboveCount - belowCount} functions at average`, options: { fontSize: 14, color: T2 } }
+  ], { x: 8.8, y: 1.8, w: 3.8, h: 2.0, fontFace: 'Segoe UI', valign: 'middle', lineSpacingMultiple: 1.8 });
+
+  // Function scores table at bottom
+  const fnTableRows = [
+    [{ text: 'Function', options: { bold: true, color: DIM, fontSize: 11 } },
+     { text: 'Your Score', options: { bold: true, color: DIM, fontSize: 11 } },
+     { text: `${indLabel} Avg`, options: { bold: true, color: DIM, fontSize: 11 } },
+     { text: 'Delta', options: { bold: true, color: DIM, fontSize: 11 } },
+     { text: 'Tier', options: { bold: true, color: DIM, fontSize: 11 } }]
+  ];
+  CSF_DATA.forEach(fn => {
+    const score = calcFunctionScore(fn);
+    const indScore = bench[fn.id];
+    const d = score ? (score - indScore) : 0;
+    fnTableRows.push([
+      { text: fn.name, options: { color: fnColors[fn.id], bold: true, fontSize: 12 } },
+      { text: score ? score.toFixed(2) : 'N/A', options: { color: TEXT, fontSize: 12, align: 'center' } },
+      { text: indScore.toFixed(2), options: { color: DIM, fontSize: 12, align: 'center' } },
+      { text: d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1), options: { color: d > 0.2 ? T4 : d < -0.2 ? T1 : T2, fontSize: 12, bold: true, align: 'center' } },
+      { text: getTierName(score), options: { color: tierColor(score), fontSize: 11, align: 'center' } }
+    ]);
+  });
+  slide.addTable(fnTableRows, {
+    x: 0.5, y: 4.5, w: 12.3, colW: [2.5, 2.5, 2.5, 2.3, 2.5],
+    border: { type: 'solid', pt: 0.5, color: '2A3A4E' },
+    fill: { color: SURFACE },
+    rowH: 0.4,
+    fontFace: 'Segoe UI',
+    autoPage: false
+  });
+
+  // ---- SLIDE 3: Category Breakdown ----
+  slide = pptx.addSlide();
+  addBg(slide);
+  slide.addText('Category Breakdown', { x: 0.5, y: 0.3, w: 12, h: 0.6, fontSize: 24, fontFace: 'Segoe UI', color: TEXT, bold: true });
+
+  const catTableRows = [
+    [{ text: 'Function', options: { bold: true, color: DIM, fontSize: 10 } },
+     { text: 'Category', options: { bold: true, color: DIM, fontSize: 10 } },
+     { text: 'Score', options: { bold: true, color: DIM, fontSize: 10 } },
+     { text: 'Tier', options: { bold: true, color: DIM, fontSize: 10 } },
+     { text: 'Assessed', options: { bold: true, color: DIM, fontSize: 10 } }]
+  ];
+  CSF_DATA.forEach(fn => {
+    fn.categories.forEach(cat => {
+      const score = calcCategoryScore(cat);
+      const answered = cat.subs.filter(s => answers[s.id] !== undefined).length;
+      catTableRows.push([
+        { text: fn.id, options: { color: fnColors[fn.id], bold: true, fontSize: 10 } },
+        { text: `${cat.id}: ${cat.name}`, options: { color: TEXT, fontSize: 10 } },
+        { text: score !== null ? score.toFixed(2) : 'N/A', options: { color: tierColor(score), fontSize: 10, bold: true, align: 'center' } },
+        { text: getTierName(score), options: { color: tierColor(score), fontSize: 10, align: 'center' } },
+        { text: `${answered}/${cat.subs.length}`, options: { color: DIM, fontSize: 10, align: 'center' } }
+      ]);
+    });
+  });
+  slide.addTable(catTableRows, {
+    x: 0.5, y: 1.1, w: 12.3, colW: [1.2, 5.0, 1.8, 2.3, 2.0],
+    border: { type: 'solid', pt: 0.5, color: '2A3A4E' },
+    fill: { color: SURFACE },
+    rowH: 0.27,
+    fontFace: 'Segoe UI',
+    autoPage: true,
+    autoPageSlideStartY: 0.5
+  });
+
+  // ---- SLIDE 4: Key Recommendations ----
+  slide = pptx.addSlide();
+  addBg(slide);
+  slide.addText('Key Recommendations', { x: 0.5, y: 0.3, w: 12, h: 0.6, fontSize: 24, fontFace: 'Segoe UI', color: TEXT, bold: true });
+  slide.addText(`Based on your assessment results compared to ${indLabel} benchmarks`, { x: 0.5, y: 0.9, w: 12, h: 0.4, fontSize: 12, fontFace: 'Segoe UI', color: DIM });
+
+  const recs = generateRecommendations();
+  let recY = 1.5;
+  recs.slice(0, 6).forEach(r => {
+    const priorityColor = r.priority === 'CRITICAL' ? T1 : r.priority === 'HIGH PRIORITY' ? T2 : r.priority === 'MODERATE' ? T3 : DIM;
+    // Strip HTML tags from rec text
+    const cleanText = r.text.replace(/<[^>]*>/g, '');
+    slide.addShape(pptx.ShapeType.roundRect, { x: 0.5, y: recY, w: 12.3, h: 0.85, fill: { color: SURFACE }, rectRadius: 0.08 });
+    slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: recY, w: 0.06, h: 0.85, fill: { color: priorityColor } });
+    slide.addText(r.priority, { x: 0.8, y: recY + 0.05, w: 2, h: 0.25, fontSize: 9, fontFace: 'Segoe UI', color: priorityColor, bold: true });
+    slide.addText(cleanText, { x: 0.8, y: recY + 0.28, w: 11.8, h: 0.5, fontSize: 10, fontFace: 'Segoe UI', color: TEXT, lineSpacingMultiple: 1.2 });
+    recY += 0.95;
+  });
+
+  // ---- SLIDE 5: Industry Benchmarking Detail ----
+  slide = pptx.addSlide();
+  addBg(slide);
+  slide.addText(`Industry Benchmarking: You vs. ${indLabel}`, { x: 0.5, y: 0.3, w: 12, h: 0.6, fontSize: 24, fontFace: 'Segoe UI', color: TEXT, bold: true });
+  slide.addText('How your organization compares to industry peers across all 6 NIST CSF functions', { x: 0.5, y: 0.9, w: 12, h: 0.4, fontSize: 12, fontFace: 'Segoe UI', color: DIM });
+
+  // Horizontal bar chart comparison
+  const barStartY = 1.6;
+  const barHeight = 0.35;
+  const barGap = 0.85;
+  const barMaxW = 7.0;
+  const barStartX = 3.0;
+
+  // Scale markers
+  for (let i = 1; i <= 4; i++) {
+    const markerX = barStartX + (i / 4) * barMaxW;
+    slide.addText(String(i), { x: markerX - 0.15, y: barStartY - 0.35, w: 0.3, h: 0.3, fontSize: 9, color: DIM, fontFace: 'Segoe UI', align: 'center' });
+    slide.addShape(pptx.ShapeType.rect, { x: markerX, y: barStartY - 0.05, w: 0.01, h: barGap * 6 + 0.1, fill: { color: '2A3A4E' } });
+  }
+
+  CSF_DATA.forEach((fn, idx) => {
+    const y = barStartY + idx * barGap;
+    const score = calcFunctionScore(fn) || 0;
+    const indScore = bench[fn.id];
+    const d = score - indScore;
+
+    // Function label
+    slide.addText(fn.name, { x: 0.5, y: y, w: 2.3, h: barHeight * 2 + 0.1, fontSize: 14, fontFace: 'Segoe UI', color: fnColors[fn.id], bold: true, valign: 'middle' });
+
+    // Your bar
+    slide.addShape(pptx.ShapeType.roundRect, { x: barStartX, y: y, w: (score / 4) * barMaxW, h: barHeight, fill: { color: fnColors[fn.id] }, rectRadius: 0.05 });
+    // Industry bar
+    slide.addShape(pptx.ShapeType.roundRect, { x: barStartX, y: y + barHeight + 0.05, w: (indScore / 4) * barMaxW, h: barHeight, fill: { color: '666666' }, rectRadius: 0.05 });
+
+    // Score labels
+    slide.addText(score.toFixed(1), { x: barStartX + (score / 4) * barMaxW + 0.15, y: y, w: 0.6, h: barHeight, fontSize: 11, fontFace: 'Segoe UI', color: TEXT, bold: true, valign: 'middle' });
+    slide.addText(indScore.toFixed(1), { x: barStartX + (indScore / 4) * barMaxW + 0.15, y: y + barHeight + 0.05, w: 0.6, h: barHeight, fontSize: 10, fontFace: 'Segoe UI', color: DIM, valign: 'middle' });
+
+    // Delta
+    const deltaStr = d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1);
+    const dColor = d > 0.2 ? T4 : d < -0.2 ? T1 : T2;
+    slide.addText(deltaStr, { x: 11.5, y: y, w: 1.2, h: barHeight * 2 + 0.1, fontSize: 16, fontFace: 'Segoe UI', color: dColor, bold: true, align: 'center', valign: 'middle' });
+  });
+
+  // Legend
+  slide.addShape(pptx.ShapeType.roundRect, { x: 3.0, y: 6.8, w: 0.3, h: 0.15, fill: { color: ACCENT } });
+  slide.addText('Your Score', { x: 3.4, y: 6.75, w: 1.5, h: 0.25, fontSize: 10, fontFace: 'Segoe UI', color: DIM });
+  slide.addShape(pptx.ShapeType.roundRect, { x: 5.2, y: 6.8, w: 0.3, h: 0.15, fill: { color: '666666' } });
+  slide.addText(`${indLabel} Average`, { x: 5.6, y: 6.75, w: 2.0, h: 0.25, fontSize: 10, fontFace: 'Segoe UI', color: DIM });
+
+  // ---- SLIDE 6: Full Subcategory Detail (per function) ----
+  CSF_DATA.forEach(fn => {
+    slide = pptx.addSlide();
+    addBg(slide);
+    slide.addText(`${fn.name} — Subcategory Detail`, { x: 0.5, y: 0.3, w: 12, h: 0.5, fontSize: 20, fontFace: 'Segoe UI', color: fnColors[fn.id], bold: true });
+    slide.addText(`Function Score: ${(calcFunctionScore(fn) || 0).toFixed(2)} | Industry Avg: ${bench[fn.id].toFixed(2)}`, { x: 0.5, y: 0.8, w: 12, h: 0.35, fontSize: 12, fontFace: 'Segoe UI', color: DIM });
+
+    const subRows = [
+      [{ text: 'ID', options: { bold: true, color: DIM, fontSize: 9 } },
+       { text: 'Question', options: { bold: true, color: DIM, fontSize: 9 } },
+       { text: 'Score', options: { bold: true, color: DIM, fontSize: 9 } },
+       { text: 'Tier', options: { bold: true, color: DIM, fontSize: 9 } }]
+    ];
+    fn.categories.forEach(cat => {
+      // Category header row
+      subRows.push([
+        { text: cat.id, options: { bold: true, color: fnColors[fn.id], fontSize: 9, fill: { color: '1A2332' } } },
+        { text: cat.name, options: { bold: true, color: TEXT, fontSize: 9, fill: { color: '1A2332' } } },
+        { text: '', options: { fill: { color: '1A2332' } } },
+        { text: '', options: { fill: { color: '1A2332' } } }
+      ]);
+      cat.subs.forEach(sub => {
+        const val = answers[sub.id];
+        const scoreText = val !== undefined ? (val === 0 ? 'N/A' : String(val)) : '-';
+        const tierText = val !== undefined ? (val === 0 ? 'N/A' : getTierName(val)) : 'Not Assessed';
+        subRows.push([
+          { text: sub.id, options: { color: DIM, fontSize: 8 } },
+          { text: sub.text, options: { color: TEXT, fontSize: 8 } },
+          { text: scoreText, options: { color: tierColor(val), fontSize: 9, bold: true, align: 'center' } },
+          { text: tierText, options: { color: tierColor(val), fontSize: 8, align: 'center' } }
+        ]);
+      });
+    });
+    slide.addTable(subRows, {
+      x: 0.5, y: 1.3, w: 12.3, colW: [1.3, 7.2, 1.3, 2.5],
+      border: { type: 'solid', pt: 0.5, color: '2A3A4E' },
+      fill: { color: SURFACE },
+      rowH: 0.25,
+      fontFace: 'Segoe UI',
+      autoPage: true,
+      autoPageSlideStartY: 0.5
+    });
+  });
+
+  // Save
+  pptx.writeFile({ fileName: `NIST-CSF2-Assessment-${orgInfo.name.replace(/\s+/g, '-')}-${orgInfo.date}.pptx` });
+}
+
+// ====== SAVE / LOAD ======
+function saveProgress() {
+  const data = { orgInfo, answers, version: '2.0' };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `CSF2-Progress-${orgInfo.name ? orgInfo.name.replace(/\s+/g, '-') : 'draft'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadProgress() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.answers && data.orgInfo) {
+          answers = data.answers;
+          orgInfo = data.orgInfo;
+          // Sync loaded answers to Firebase if in collaborative mode
+          if (isCollaborative && sessionRef) {
+            Object.entries(answers).forEach(([subId, tier]) => {
+              syncAnswerToFirebase(subId, tier);
+            });
+          }
+          document.getElementById('orgName').value = orgInfo.name || '';
+          document.getElementById('orgIndustry').value = orgInfo.industry || '';
+          document.getElementById('assessorName').value = orgInfo.assessor || '';
+          startAssessment();
+        }
+      } catch(err) {
+        alert('Invalid file format.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+</script>
+</body>
+</html>
