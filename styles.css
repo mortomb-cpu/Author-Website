@@ -2087,6 +2087,135 @@ a { color: inherit; text-decoration: none; }
     to { opacity: 1; }
 }
 
+/* --- BESTSELLER BANNER --- */
+.bestseller-banner {
+    background: var(--bg-surface);
+    border-top: 1px solid var(--amber);
+    border-bottom: 1px solid var(--amber);
+    padding: var(--space-xl) 0;
+    text-align: center;
+}
+
+.bestseller-badge {
+    font-family: var(--font-mono);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px var(--amber-glow), 0 0 40px var(--amber-dim);
+    margin-bottom: var(--space-xs);
+}
+
+.bestseller-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+/* --- FREE PROMO --- */
+.free-promo {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.8rem 1.5rem;
+    border: 2px solid var(--amber);
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(212, 160, 49, 0.15) 0%, rgba(212, 160, 49, 0.05) 100%);
+    animation: promoPulse 2s ease-in-out infinite;
+}
+
+.free-promo-text {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    text-transform: uppercase;
+}
+
+.free-promo-date {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+}
+
+@keyframes promoPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 10px var(--amber-dim); }
+    50% { transform: scale(1.02); box-shadow: 0 0 20px var(--amber-glow); }
+}
+
+/* --- FIELD REPORTS (Reviews) --- */
+.field-reports {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.field-report {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    transition: all var(--transition);
+}
+
+.field-report:hover {
+    border-color: var(--border-light);
+    border-left-color: var(--amber);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.report-stars {
+    font-size: 0.9rem;
+    margin-bottom: var(--space-xs);
+    color: var(--amber);
+}
+
+.report-quote {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.7;
+}
+
+/* --- FILE BESTSELLER TAG --- */
+.file-bestseller-tag {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+}
+
+/* --- BOOK 2 TEASER --- */
+.book2-teaser {
+    text-align: center;
+    padding-top: var(--space-lg);
+}
+
+.book2-teaser p {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+}
+
+.book2-teaser strong {
+    color: var(--amber);
+    font-style: normal;
+}
+
 /* --- REVEAL ANIMATIONS --- */
 .reveal-element {
     opacity: 0;
@@ -2127,6 +2256,10 @@ a { color: inherit; text-decoration: none; }
 
     .file-meta-grid {
         justify-content: center;
+    }
+
+    .field-reports {
+        grid-template-columns: 1fr;
     }
 
     .dossier {
