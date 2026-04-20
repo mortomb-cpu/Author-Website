@@ -1789,6 +1789,8 @@
             btn.innerHTML = '<span class="btn-icon">&#9654;</span> TRANSMITTING...';
 
             const data = new FormData(form);
+            // Hardwire Reply-To so replying in Gmail goes to the sender, not noreply@formspree.io
+            data.set('_replyto', data.get('email'));
             const wantsSubscribe = form.querySelector('#contact-subscribe')?.checked;
 
             // If user opted in, also subscribe them to the MailerLite list (fire-and-forget, parallel).
