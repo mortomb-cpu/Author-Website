@@ -2150,6 +2150,113 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* --- FIELD REPORTS (Reviews) --- */
+/* --- FEATURED REVIEW (Readers' Favorite) --- */
+.featured-review {
+    position: relative;
+    background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+    border: 1px solid var(--amber);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    box-shadow: 0 0 40px rgba(212, 160, 49, 0.12), inset 0 0 30px rgba(212, 160, 49, 0.03);
+}
+
+.featured-review::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--amber) 20%, var(--amber) 80%, transparent 100%);
+}
+
+.featured-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px dashed var(--border-light);
+    flex-wrap: wrap;
+}
+
+.featured-review-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    text-transform: uppercase;
+    text-shadow: 0 0 10px var(--amber-glow);
+}
+
+.featured-review-id {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+}
+
+.featured-review-quote {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--text-bright);
+    line-height: 1.8;
+    text-align: center;
+    padding: 0 var(--space-lg);
+    position: relative;
+}
+
+.featured-review-quote::before,
+.featured-review-quote::after {
+    content: '"';
+    position: absolute;
+    font-family: var(--font-serif);
+    font-size: 3rem;
+    color: var(--amber);
+    opacity: 0.4;
+    line-height: 1;
+}
+
+.featured-review-quote::before {
+    top: -0.5rem;
+    left: 0;
+}
+
+.featured-review-quote::after {
+    bottom: -1.5rem;
+    right: 0;
+}
+
+.featured-review-attribution {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px dashed var(--border-light);
+}
+
+.featured-review-author {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.05em;
+}
+
+.featured-review-source {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
 .field-reports {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2260,6 +2367,20 @@ a { color: inherit; text-decoration: none; }
 
     .field-reports {
         grid-template-columns: 1fr;
+    }
+
+    .featured-review {
+        padding: var(--space-lg);
+    }
+
+    .featured-review-quote {
+        font-size: 1rem;
+        padding: 0 var(--space-md);
+    }
+
+    .featured-review-header {
+        justify-content: center;
+        text-align: center;
     }
 
     .dossier {
