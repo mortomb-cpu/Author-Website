@@ -2296,6 +2296,164 @@ a { color: inherit; text-decoration: none; }
     text-transform: uppercase;
 }
 
+/* --- PRESS & REVIEWS header --- */
+.press-header {
+    max-width: 960px;
+    margin: 0 auto var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: 0 var(--space-sm);
+}
+
+.press-code {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.press-title {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.press-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--amber) 0%, transparent 100%);
+}
+
+/* --- READ FULL REVIEW link --- */
+.accolade-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: var(--space-sm);
+    padding: 0.6rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--amber);
+    background: transparent;
+    border: 1px solid var(--amber-dim);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all var(--transition);
+    align-self: flex-start;
+}
+
+.accolade-link:hover {
+    background: var(--amber-dim);
+    border-color: var(--amber);
+    transform: translateX(3px);
+    box-shadow: 0 0 15px var(--amber-dim);
+}
+
+/* --- AWARD CONTESTANT BANNER --- */
+.award-banner {
+    max-width: 960px;
+    margin: var(--space-lg) auto 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-lg);
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+    border: 1px dashed var(--amber);
+    border-radius: var(--radius-md);
+    position: relative;
+}
+
+.award-banner::before,
+.award-banner::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    background: var(--amber);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--amber-glow);
+    transform: translateY(-50%);
+}
+.award-banner::before { left: -5px; }
+.award-banner::after { right: -5px; }
+
+.award-stamp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    padding: var(--space-sm) var(--space-md);
+    border: 2px solid var(--amber);
+    border-radius: var(--radius-sm);
+    background: rgba(212, 160, 49, 0.06);
+    transform: rotate(-3deg);
+    box-shadow: 0 0 20px rgba(212, 160, 49, 0.08), inset 0 0 15px rgba(212, 160, 49, 0.05);
+}
+
+.award-stamp-top,
+.award-stamp-mid {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--amber);
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+.award-stamp-year {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text-bright);
+    letter-spacing: 0.1em;
+    margin-top: 0.25rem;
+}
+
+.award-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.award-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.award-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text-bright);
+    line-height: 1.4;
+}
+
+.award-category {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
 .field-reports {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2432,6 +2590,38 @@ a { color: inherit; text-decoration: none; }
 
     .accolade-attribution {
         justify-content: center;
+    }
+
+    .accolade-link {
+        align-self: center;
+    }
+
+    .press-header {
+        flex-wrap: wrap;
+        gap: var(--space-sm);
+    }
+
+    .press-title {
+        font-size: 1rem;
+    }
+
+    .award-banner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: var(--space-md);
+        padding: var(--space-md);
+    }
+
+    .award-stamp {
+        margin: 0 auto;
+    }
+
+    .award-info {
+        align-items: center;
+    }
+
+    .award-title {
+        font-size: 1rem;
     }
 
     .dossier {
