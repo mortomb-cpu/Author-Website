@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Briefed | Moran Tomer</title>
+    <meta name="description" content="Subject File BRWS-269/4 — Joshua Brewster, partial declassification.">
+    <meta name="robots" content="noindex,follow">
+    <link rel="canonical" href="https://morantomer.com/briefing">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%2307080c'/%3E%3Crect x='1' y='1' width='30' height='30' rx='3' fill='none' stroke='%23d4a031' stroke-width='1'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='monospace' font-weight='700' font-size='13' fill='%23d4a031'%3EMT%3C/text%3E%3C/svg%3E">
+    <meta property="og:title" content="Get Briefed — Subject File BRWS-269/4">
+    <meta property="og:description" content="Joshua Brewster, partial declassification. KIDON service record, behavioral assessments not in the books, and first read on The Typhon Protocol.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://morantomer.com/briefing">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* ========== BRIEFING PAGE ========== */
+        body.briefing-body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-mono);
+        }
+
+        /* --- Classification banners (top + bottom) --- */
+        .kidon-banner {
+            background: #000;
+            color: var(--text-bright);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 0.8rem 1rem;
+            border-top: 1px solid var(--amber);
+            border-bottom: 1px solid var(--amber);
+            user-select: none;
+        }
+
+        .kidon-banner span {
+            color: var(--amber);
+            margin: 0 0.4rem;
+        }
+
+        /* --- Layout shell --- */
+        .briefing-shell {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(2rem, 6vw, 5rem) 1.5rem;
+            background:
+                radial-gradient(ellipse at top, rgba(212, 160, 49, 0.05), transparent 60%),
+                radial-gradient(ellipse at bottom, rgba(212, 160, 49, 0.03), transparent 60%);
+        }
+
+        .briefing-card {
+            width: 100%;
+            max-width: 640px;
+            padding: clamp(2rem, 5vw, 3.5rem);
+            background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            position: relative;
+            box-shadow: 0 0 50px rgba(212, 160, 49, 0.08);
+        }
+
+        .briefing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--amber) 30%, var(--amber) 70%, transparent);
+        }
+
+        /* --- File ID stamp (top of card) --- */
+        .briefing-stamp {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.2em;
+            color: var(--amber);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .briefing-stamp::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--amber);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--amber-glow);
+            animation: kidonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes kidonPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* --- Headline --- */
+        .briefing-headline {
+            font-family: var(--font-mono);
+            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: var(--text-bright);
+            margin: 0 0 0.8rem;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(212, 160, 49, 0.18);
+        }
+
+        .briefing-subhead {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+            margin: 0 0 var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 1px dashed var(--border-light);
+        }
+
+        /* --- Offer bullets --- */
+        .briefing-offer {
+            list-style: none;
+            margin: 0 0 var(--space-lg);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .briefing-offer li {
+            font-family: var(--font-mono);
+            font-size: 0.92rem;
+            color: var(--text);
+            line-height: 1.55;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .briefing-offer li::before {
+            content: '\2014';
+            position: absolute;
+            left: 0;
+            color: var(--amber);
+            font-weight: 700;
+        }
+
+        /* --- Form --- */
+        .briefing-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .briefing-form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .briefing-form-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--amber);
+            text-transform: uppercase;
+        }
+
+        .briefing-form input[type="email"] {
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            color: var(--text-bright);
+            background: var(--bg);
+            border: 1px solid var(--border-light);
+            border-radius: 0;
+            padding: 0.9rem 1rem;
+            letter-spacing: 0.05em;
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .briefing-form input[type="email"]::placeholder {
+            color: var(--text-dim);
+            letter-spacing: 0.1em;
+        }
+
+        .briefing-form input[type="email"]:focus {
+            border-color: var(--amber);
+            box-shadow: 0 0 0 1px var(--amber), inset 0 0 12px rgba(212, 160, 49, 0.06);
+        }
+
+        .briefing-submit {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: var(--bg);
+            text-transform: uppercase;
+            background: var(--amber);
+            border: 1px solid var(--amber);
+            border-radius: 0;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .briefing-submit:hover:not(:disabled) {
+            background: transparent;
+            color: var(--amber);
+            box-shadow: 0 0 20px var(--amber-dim);
+            transform: translateY(-1px);
+        }
+
+        .briefing-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .briefing-form-error {
+            margin: 0;
+            padding: 0.6rem 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--red);
+            background: var(--red-dim);
+            border-left: 2px solid var(--red);
+            letter-spacing: 0.05em;
+        }
+
+        /* --- Success state --- */
+        .briefing-success {
+            padding: var(--space-md);
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            color: var(--text-bright);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.02));
+            border: 1px solid var(--green);
+            border-left-width: 3px;
+            line-height: 1.6;
+            letter-spacing: 0.02em;
+            margin-bottom: var(--space-md);
+        }
+
+        .briefing-success::before {
+            content: '> ACCESS GRANTED';
+            display: block;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--green);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        /* --- Fine print --- */
+        .briefing-fineprint {
+            margin: 0;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-style: italic;
+            color: var(--text-muted);
+            line-height: 1.7;
+            letter-spacing: 0.03em;
+        }
+
+        /* --- Visually hidden (a11y) --- */
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 600px) {
+            .kidon-banner {
+                font-size: 0.66rem;
+                letter-spacing: 0.25em;
+                padding: 0.7rem 0.5rem;
+            }
+            .briefing-card {
+                padding: 1.75rem;
+            }
+            .briefing-headline {
+                letter-spacing: 0.03em;
+            }
+        }
+    </style>
+</head>
+<body class="briefing-body">
+
+    <!-- TOP CLASSIFICATION BANNER -->
+    <div class="kidon-banner" aria-label="Classification: top secret">
+        סודי ביותר <span>//</span> KIDON
+    </div>
+
+    <main class="briefing-shell">
+        <div class="briefing-card">
+
+            <div class="briefing-stamp">FILE BRWS-269/4 &middot; ACCESS REQUEST</div>
+
+            <h1 class="briefing-headline">GET BRIEFED.</h1>
+            <p class="briefing-subhead">Subject File BRWS-269/4 &mdash; Joshua Brewster, partial declassification.</p>
+
+            <ul class="briefing-offer">
+                <li>KIDON service record, partially redacted</li>
+                <li>Behavioral assessments and handler annotations not in the books</li>
+                <li>First read on <em>The Typhon Protocol</em> &mdash; Fall 2026</li>
+            </ul>
+
+            <form id="briefingForm" class="briefing-form" novalidate>
+                <div class="briefing-form-row">
+                    <label for="briefing-email" class="briefing-form-label">Operative Channel</label>
+                    <input
+                        type="email"
+                        id="briefing-email"
+                        name="email"
+                        required
+                        autocomplete="email"
+                        placeholder="OPERATIVE_EMAIL@DOMAIN"
+                        spellcheck="false"
+                    >
+                </div>
+                <button type="submit" class="briefing-submit">REQUEST BRIEFING ACCESS</button>
+                <p class="briefing-form-error" id="briefingError" hidden></p>
+            </form>
+
+            <div class="briefing-success" id="briefingSuccess" hidden>
+                Briefing access granted. Check your inbox &mdash; the file is being delivered now.
+            </div>
+
+            <p class="briefing-fineprint">
+                <em>
+                    No filler. No spam. Unsubscribe anytime.<br>
+                    Sender: Moran Tomer / Mei Mei &amp; Oliver Publishing.
+                </em>
+            </p>
+
+        </div>
+    </main>
+
+    <!-- BOTTOM CLASSIFICATION BANNER -->
+    <div class="kidon-banner" aria-label="Classification: top secret">
+        סודי ביותר <span>//</span> KIDON
+    </div>
+
+    <script>
+        (function () {
+            // ──────────────────────────────────────────────────────────
+            // MAILERLITE CONFIG — replace BRIEFING_FORM_ID with the form
+            // ID from the new "Briefing List" form once it's created in
+            // MailerLite. Until then the form will display an offline
+            // notice instead of submitting.
+            // ──────────────────────────────────────────────────────────
+            var ACCOUNT_ID = '2026769';
+            var BRIEFING_FORM_ID = ''; // <-- TODO: paste new MailerLite Briefing List form ID here
+
+            var form = document.getElementById('briefingForm');
+            var success = document.getElementById('briefingSuccess');
+            var errorEl = document.getElementById('briefingError');
+            var emailInput = document.getElementById('briefing-email');
+            var submitBtn = form.querySelector('button[type="submit"]');
+            var originalLabel = submitBtn.textContent;
+
+            function showError(msg) {
+                errorEl.textContent = msg;
+                errorEl.hidden = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalLabel;
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                errorEl.hidden = true;
+                var email = (emailInput.value || '').trim();
+
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    showError('INVALID_EMAIL — verify operative channel and retry.');
+                    emailInput.focus();
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'TRANSMITTING...';
+
+                if (!BRIEFING_FORM_ID) {
+                    // Form not yet wired to MailerLite.
+                    showError('BRIEFING_RELAY_OFFLINE — channel pending activation. Please retry shortly.');
+                    return;
+                }
+
+                var mlData = new FormData();
+                mlData.append('fields[email]', email);
+                mlData.append('ml-submit', '1');
+                mlData.append('anticsrf', 'true');
+
+                fetch('https://assets.mailerlite.com/jsonp/' + ACCOUNT_ID + '/forms/' + BRIEFING_FORM_ID + '/subscribe', {
+                    method: 'POST',
+                    body: mlData
+                }).then(function () {
+                    form.hidden = true;
+                    success.hidden = false;
+                    // Optional: scroll the success block into view on small screens.
+                    success.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }).catch(function () {
+                    showError('TRANSMISSION FAILED — please retry.');
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>
