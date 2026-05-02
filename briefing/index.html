@@ -164,6 +164,9 @@
             margin-bottom: var(--space-md);
         }
 
+        /* Ensure the [hidden] attribute beats the explicit displays above */
+        [hidden] { display: none !important; }
+
         .briefing-form-row {
             display: flex;
             flex-direction: column;
