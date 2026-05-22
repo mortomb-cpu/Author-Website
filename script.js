@@ -1791,20 +1791,11 @@
             const data = new FormData(form);
             // Hardwire Reply-To so replying in Gmail goes to the sender, not noreply@formspree.io
             data.set('_replyto', data.get('email'));
-            const wantsSubscribe = form.querySelector('#contact-subscribe')?.checked;
 
-            // If user opted in, also subscribe them to the MailerLite list (fire-and-forget, parallel).
-            if (wantsSubscribe) {
-                const mlData = new FormData();
-                mlData.append('fields[email]', data.get('email'));
-                mlData.append('fields[name]', data.get('name'));
-                mlData.append('ml-submit', '1');
-                mlData.append('anticsrf', 'true');
-                fetch('https://assets.mailerlite.com/jsonp/2026769/forms/180725101560333996/subscribe', {
-                    method: 'POST',
-                    body: mlData,
-                }).catch(() => { /* non-blocking — the Formspree message is still the primary submission */ });
-            }
+            // The contact form is intentionally one-way: it emails Moran via
+            // Formspree and never auto-subscribes the sender to any list.
+            // Readers who want to join the mailing list use the RECRUIT form
+            // (or /briefing) instead.
 
             fetch('https://formspree.io/f/xdalbgpj', {
                 method: 'POST',
