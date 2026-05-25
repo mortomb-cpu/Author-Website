@@ -560,6 +560,14 @@
             window.addEventListener('scroll', updateActive, { passive: true });
             updateActive();
 
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 960 && navLinks.classList.contains('open')) {
+                    navToggle.classList.remove('open');
+                    navLinks.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();

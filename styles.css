@@ -2689,7 +2689,7 @@ a { color: inherit; text-decoration: none; }
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 960px) {
     .nav-links {
         display: none;
         position: fixed;
@@ -2705,6 +2705,9 @@ a { color: inherit; text-decoration: none; }
         justify-content: center;
         gap: var(--space-lg);
         z-index: 999;
+        overflow-y: auto;
+        padding: var(--space-xl) var(--space-md);
+        -webkit-overflow-scrolling: touch;
     }
 
     .nav-links.open {
@@ -2713,6 +2716,10 @@ a { color: inherit; text-decoration: none; }
 
     .nav-links a {
         font-size: 1.2rem;
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 
     .nav-toggle {
@@ -2736,6 +2743,19 @@ a { color: inherit; text-decoration: none; }
     .nav-status { display: none; }
     .nav-countdown { display: none; }
 
+    .nav-inner {
+        justify-content: space-between;
+    }
+
+    .nav-toggle {
+        min-width: 44px;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
     .toast-container {
         right: 12px;
         bottom: 12px;
