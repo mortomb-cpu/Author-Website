@@ -1203,17 +1203,17 @@ a { color: inherit; text-decoration: none; }
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    transition: transform var(--transition);
+}
+
+.mission-file--classified:hover .classified-cover--revealed {
+    transform: scale(1.03) translateY(-4px);
 }
 
 .classified-cover-img {
     display: block;
     width: 100%;
     height: auto;
-    transition: transform var(--transition);
-}
-
-.mission-file--classified:hover .classified-cover-img {
-    transform: scale(1.03);
 }
 
 .file-intel {
