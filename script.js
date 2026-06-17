@@ -574,15 +574,29 @@
         }
     };
 
-    // ─── COUNTDOWN (April 11, 2026) ─────────────────
+    // ─── COUNTDOWN (Book 2 — The Typhon Protocol, Sept 1, 2026) ─────────────────
     const Countdown = {
-        targetDate: new Date('2026-04-11T00:00:00').getTime(),
+        targetDate: new Date('2026-09-01T00:00:00').getTime(),
         timerEl: null,
+        sectionEl: null,
+        units: null,
         interval: null,
 
         init() {
             this.timerEl = document.getElementById('countdownTimer');
-            if (!this.timerEl) return;
+            this.sectionEl = document.getElementById('book2Countdown');
+            // Prefer an explicit per-section target date if provided
+            if (this.sectionEl && this.sectionEl.dataset.target) {
+                const t = new Date(this.sectionEl.dataset.target).getTime();
+                if (!isNaN(t)) this.targetDate = t;
+                this.units = {
+                    days: this.sectionEl.querySelector('[data-days]'),
+                    hours: this.sectionEl.querySelector('[data-hours]'),
+                    mins: this.sectionEl.querySelector('[data-mins]'),
+                    secs: this.sectionEl.querySelector('[data-secs]')
+                };
+            }
+            if (!this.timerEl && !this.sectionEl) return;
 
             this.update();
             this.interval = setInterval(() => this.update(), 1000);
@@ -593,8 +607,18 @@
             const diff = this.targetDate - now;
 
             if (diff <= 0) {
-                this.timerEl.textContent = 'DEPLOYED';
-                this.timerEl.classList.add('deployed');
+                if (this.timerEl) {
+                    this.timerEl.textContent = 'DEPLOYED';
+                    this.timerEl.classList.add('deployed');
+                }
+                if (this.sectionEl) {
+                    this.sectionEl.classList.add('deployed');
+                    if (this.units) {
+                        ['days', 'hours', 'mins', 'secs'].forEach(k => {
+                            if (this.units[k]) this.units[k].textContent = '00';
+                        });
+                    }
+                }
                 if (this.interval) clearInterval(this.interval);
                 return;
             }
@@ -604,11 +628,19 @@
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-            this.timerEl.textContent =
-                String(d).padStart(2, '0') + 'D ' +
-                String(h).padStart(2, '0') + 'H ' +
-                String(m).padStart(2, '0') + 'M ' +
-                String(s).padStart(2, '0') + 'S';
+            if (this.timerEl) {
+                this.timerEl.textContent =
+                    String(d).padStart(2, '0') + 'D ' +
+                    String(h).padStart(2, '0') + 'H ' +
+                    String(m).padStart(2, '0') + 'M ' +
+                    String(s).padStart(2, '0') + 'S';
+            }
+            if (this.units) {
+                if (this.units.days) this.units.days.textContent = String(d).padStart(2, '0');
+                if (this.units.hours) this.units.hours.textContent = String(h).padStart(2, '0');
+                if (this.units.mins) this.units.mins.textContent = String(m).padStart(2, '0');
+                if (this.units.secs) this.units.secs.textContent = String(s).padStart(2, '0');
+            }
         }
     };
 
