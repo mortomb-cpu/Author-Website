@@ -348,8 +348,10 @@ a { color: inherit; text-decoration: none; }
 .main-site {
     position: relative;
     z-index: 2;
-    opacity: 0;
-    transition: opacity 0.8s ease 0.2s;
+    /* Rendered immediately (opacity:1) so the hero is LCP-eligible at first
+       paint instead of waiting for the ~8s boot to add .visible. The opaque
+       boot overlay still covers it; the boot's fade-out is the reveal. */
+    opacity: 1;
 }
 
 .main-site.visible {
@@ -666,7 +668,7 @@ a { color: inherit; text-decoration: none; }
 .hero-bg-image {
     position: absolute;
     inset: 0;
-    background-image: url('images/hero-bg.jpg');
+    background-image: url('images/hero-bg.jpg?v=2');
     background-size: cover;
     background-position: center;
     opacity: 0.35;

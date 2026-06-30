@@ -78,6 +78,17 @@
             const skipBtn = document.getElementById('bootSkip');
             const progressBar = document.getElementById('bootProgressBar');
 
+            // Run the heavy init chain OFF the click/reveal path so the
+            // handler returns fast and the reveal paints first (fixes INP on
+            // #bootSkip — onComplete() initialises ~20 modules synchronously).
+            const deferInit = () => {
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(onComplete, { timeout: 200 });
+                } else {
+                    setTimeout(onComplete, 0);
+                }
+            };
+
             const finish = () => {
                 if (this.cancelled) return;
                 this.cancelled = true;
@@ -87,7 +98,7 @@
                 const t = setTimeout(() => {
                     bootScreen.classList.add('done');
                     mainSite.classList.add('visible');
-                    onComplete();
+                    deferInit();
                 }, 1500);
                 this.timeouts.push(t);
             };
@@ -98,7 +109,7 @@
                 this.timeouts = [];
                 bootScreen.classList.add('done');
                 mainSite.classList.add('visible');
-                onComplete();
+                deferInit();
             };
 
             skipBtn.addEventListener('click', skip);
@@ -540,25 +551,21 @@
                 });
             });
 
-            const updateActive = () => {
-                const scrollPos = window.scrollY + 100;
-                sections.forEach(section => {
-                    const top = section.offsetTop;
-                    const height = section.offsetHeight;
-                    const id = section.getAttribute('id');
+            // Scroll-spy via IntersectionObserver instead of reading
+            // offsetTop/offsetHeight for every section on every scroll event.
+            // Those forced layout reads ran during the smooth-scroll that the
+            // hero button and nav links trigger, inflating their INP.
+            const navObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const id = entry.target.getAttribute('id');
                     const link = navLinks.querySelector(`a[href="#${id}"]`);
-                    if (link) {
-                        if (scrollPos >= top && scrollPos < top + height) {
-                            link.classList.add('active');
-                        } else {
-                            link.classList.remove('active');
-                        }
-                    }
+                    if (!link) return;
+                    navLinks.querySelectorAll('a.active').forEach(a => a.classList.remove('active'));
+                    link.classList.add('active');
                 });
-            };
-
-            window.addEventListener('scroll', updateActive, { passive: true });
-            updateActive();
+            }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+            sections.forEach(section => navObserver.observe(section));
 
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
